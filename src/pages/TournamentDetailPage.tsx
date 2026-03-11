@@ -5,6 +5,9 @@ import { OverviewTab } from "@/modules/tournaments/components/OverviewTab";
 import { TeamsTab } from "@/modules/tournaments/components/TeamsTab";
 import { StandingsTab } from "@/modules/tournaments/components/StandingsTab";
 import { MatchesTab } from "@/modules/tournaments/components/MatchesTab";
+import { PlayersTab } from "@/modules/tournaments/components/PlayersTab";
+import { StatisticsTab } from "@/modules/tournaments/components/StatisticsTab";
+import { SettingsTab } from "@/modules/tournaments/components/SettingsTab";
 import { Tournament } from "@/modules/tournaments/types/tournament";
 
 const tabs = ["Overview", "Teams", "Matches", "Standings", "Players", "Statistics", "Settings"];
@@ -25,7 +28,7 @@ export default function TournamentDetailPage() {
   const [activeTab, setActiveTab] = useState("Overview");
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-20">
       <TournamentDetailsHeader tournament={mockTournament} />
       
       <TournamentTabs 
@@ -35,16 +38,15 @@ export default function TournamentDetailPage() {
       />
 
       {/* Tab Content */}
-      {activeTab === "Overview" && <OverviewTab />}
-      {activeTab === "Teams" && <TeamsTab />}
-      {activeTab === "Standings" && <StandingsTab />}
-      {activeTab === "Matches" && <MatchesTab />}
-
-      {(activeTab === "Players" || activeTab === "Statistics" || activeTab === "Settings") && (
-        <div className="flex items-center justify-center py-20 text-muted-foreground">
-          <p>Content for {activeTab} tab coming soon...</p>
-        </div>
-      )}
+      <div className="mt-6">
+        {activeTab === "Overview" && <OverviewTab />}
+        {activeTab === "Teams" && <TeamsTab />}
+        {activeTab === "Standings" && <StandingsTab />}
+        {activeTab === "Matches" && <MatchesTab />}
+        {activeTab === "Players" && <PlayersTab />}
+        {activeTab === "Statistics" && <StatisticsTab />}
+        {activeTab === "Settings" && <SettingsTab />}
+      </div>
     </div>
   );
 }

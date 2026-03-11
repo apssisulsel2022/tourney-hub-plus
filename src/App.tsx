@@ -53,17 +53,27 @@ import PublicMatchesPage from "@/pages/public/PublicMatchesPage";
 import PublicStandingsPage from "@/pages/public/PublicStandingsPage";
 import NotFound from "@/pages/NotFound";
 
+import { RealtimeProvider } from "@/modules/realtime/hooks/useRealtime";
+
 const queryClient = new QueryClient();
 
-const DL = ({ children }: { children: React.ReactNode }) => <DashboardLayout>{children}</DashboardLayout>;
-const AL = ({ children }: { children: React.ReactNode }) => <AdminLayout>{children}</AdminLayout>;
+const DL = ({ children }: { children: React.ReactNode }) => (
+  <RealtimeProvider>
+    <DashboardLayout>{children}</DashboardLayout>
+  </RealtimeProvider>
+);
+const AL = ({ children }: { children: React.ReactNode }) => (
+  <RealtimeProvider>
+    <AdminLayout>{children}</AdminLayout>
+  </RealtimeProvider>
+);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Routes>
           {/* Auth */}
           <Route path="/login" element={<LoginPage />} />
@@ -103,8 +113,8 @@ const App = () => (
 
           {/* Teams */}
           <Route path="/teams" element={<DL><TeamsPage /></DL>} />
-          <Route path="/teams/detail" element={<DL><TeamDetailPage /></DL>} />
-          <Route path="/teams/register" element={<DL><TeamRegistrationPage /></DL>} />
+          <Route path="/teams/:id" element={<DL><TeamDetailPage /></DL>} />
+          <Route path="/teams/create" element={<DL><TeamRegistrationPage /></DL>} />
 
           {/* Players */}
           <Route path="/players" element={<DL><PlayersPage /></DL>} />
@@ -139,6 +149,7 @@ const App = () => (
           {/* Club Manager */}
           <Route path="/club-dashboard" element={<DL><ClubManagerDashboard /></DL>} />
 
+          <Route path="/media" element={<DL><div>Media Page</div></DL>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

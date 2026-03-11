@@ -98,8 +98,50 @@
     font-family: 'Inter', sans-serif;
   }
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Inter', sans-serif;
-    @apply font-bold tracking-tight;
+    @apply tracking-tight;
+  }
+}
+
+@layer utilities {
+  @media print {
+    .no-print {
+      display: none !important;
+    }
+    
+    .print-only {
+      display: block !important;
+    }
+    
+    body {
+      background: white !important;
+      color: black !important;
+    }
+    
+    .bg-card {
+      background: white !important;
+      border: 1px solid #e5e7eb !important;
+      box-shadow: none !important;
+    }
+    
+    .text-secondary {
+      color: #0d6d3d !important;
+    }
+    
+    .border-muted {
+      border-color: #f3f4f6 !important;
+    }
+    
+    .rounded-2xl, .rounded-3xl, .rounded-xl {
+      border-radius: 0.5rem !important;
+    }
+    
+    .shadow-sm, .shadow-md, .shadow-lg, .shadow-xl {
+      box-shadow: none !important;
+    }
+    
+    .animate-in {
+      animation: none !important;
+    }
   }
 }
 
