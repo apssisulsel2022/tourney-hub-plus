@@ -128,7 +128,7 @@ const App = () => (
 
             {/* Organizations */}
             <Route path="/organizations" element={<DL><OrganizationsPage /></DL>} />
-            <Route path="/organizations/detail" element={<DL><OrganizationDetailPage /></DL>} />
+            <Route path="/organizations/:id" element={<DL><OrganizationDetailPage /></DL>} />
 
             {/* Tournaments */}
             <Route path="/tournaments" element={<DL><TournamentsPage /></DL>} />
