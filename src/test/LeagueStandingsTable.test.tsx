@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, within } from "@testing-library/react";
 import { describe, it, expect } from "vitest";
 import { LeagueStandingsTable, StandingsTeamRow } from "../components/LeagueStandingsTable";
 
@@ -12,38 +12,45 @@ const baseData: StandingsTeamRow[] = [
 describe("LeagueStandingsTable", () => {
   it("renders required headers and rows", () => {
     render(<LeagueStandingsTable data={baseData} />);
-    expect(screen.getByText("Position")).toBeDefined();
-    expect(screen.getByText("Team")).toBeDefined();
-    expect(screen.getByText("Played")).toBeDefined();
-    expect(screen.getByText("Win")).toBeDefined();
-    expect(screen.getByText("Draw")).toBeDefined();
-    expect(screen.getByText("Loss")).toBeDefined();
-    expect(screen.getByText("Goals For")).toBeDefined();
-    expect(screen.getByText("Goals Against")).toBeDefined();
-    expect(screen.getByText("Points")).toBeDefined();
-    expect(screen.getByText("Alpha FC")).toBeDefined();
-    expect(screen.getByText("Beta United")).toBeDefined();
-    expect(screen.getByText("Gamma City")).toBeDefined();
+    const table = screen.getByRole("table", { name: /league standings table/i });
+    const t = within(table);
+    expect(t.getByText("Position")).toBeDefined();
+    expect(t.getByText("Team")).toBeDefined();
+    expect(t.getByText("Played")).toBeDefined();
+    expect(t.getByText("Win")).toBeDefined();
+    expect(t.getByText("Draw")).toBeDefined();
+    expect(t.getByText("Loss")).toBeDefined();
+    expect(t.getByText("Goals For")).toBeDefined();
+    expect(t.getByText("Goals Against")).toBeDefined();
+    expect(t.getByText("Points")).toBeDefined();
+    expect(t.getByText("Alpha FC")).toBeDefined();
+    expect(t.getByText("Beta United")).toBeDefined();
+    expect(t.getByText("Gamma City")).toBeDefined();
   });
 
   it("formats position with ordinal indicators for English locales", () => {
     render(<LeagueStandingsTable data={baseData} locale="en-US" />);
-    expect(screen.getByText("1st")).toBeDefined();
-    expect(screen.getByText("2nd")).toBeDefined();
-    expect(screen.getByText("3rd")).toBeDefined();
+    const table = screen.getByRole("table", { name: /league standings table/i });
+    const t = within(table);
+    expect(t.getByText("1st")).toBeDefined();
+    expect(t.getByText("2nd")).toBeDefined();
+    expect(t.getByText("3rd")).toBeDefined();
   });
 
   it("right-aligns numeric columns via className", () => {
     render(<LeagueStandingsTable data={baseData} />);
-    const pointsHeader = screen.getByRole("button", { name: /Sort by Points/i }).closest("th");
+    const table = screen.getByRole("table", { name: /league standings table/i });
+    const pointsHeader = within(table).getByRole("button", { name: /Sort by Points/i }).closest("th");
     expect(pointsHeader?.className.includes("text-right")).toBe(true);
   });
 
   it("applies top 3 highlight classes", () => {
     render(<LeagueStandingsTable data={baseData} />);
-    const row1 = screen.getByText("Alpha FC").closest("tr");
-    const row2 = screen.getByText("Beta United").closest("tr");
-    const row3 = screen.getByText("Gamma City").closest("tr");
+    const table = screen.getByRole("table", { name: /league standings table/i });
+    const t = within(table);
+    const row1 = t.getByText("Alpha FC").closest("tr");
+    const row2 = t.getByText("Beta United").closest("tr");
+    const row3 = t.getByText("Gamma City").closest("tr");
     expect(row1?.className.includes("bg-yellow-500/15")).toBe(true);
     expect(row2?.className.includes("bg-muted/60")).toBe(true);
     expect(row3?.className.includes("bg-amber-700/15")).toBe(true);
@@ -57,8 +64,9 @@ describe("LeagueStandingsTable", () => {
     ];
     render(<LeagueStandingsTable data={tieData} initialSort={{ key: "teamName", direction: "asc" }} />);
 
-    fireEvent.click(screen.getByRole("button", { name: /Sort by Points/i }));
-    const rows = screen.getAllByRole("row");
+    const table = screen.getByRole("table", { name: /league standings table/i });
+    fireEvent.click(within(table).getByRole("button", { name: /Sort by Points/i }));
+    const rows = within(table).getAllByRole("row");
     const firstBodyRow = rows[1];
     expect(firstBodyRow.textContent?.includes("A")).toBe(true);
   });
@@ -69,13 +77,15 @@ describe("LeagueStandingsTable", () => {
       { position: 2, teamName: "B", played: 10, win: 7, draw: 2, loss: 1, goalsFor: 10, goalsAgainst: 5, points: 23 },
     ];
     render(<LeagueStandingsTable data={tieData} initialSort={{ key: "points", direction: "desc" }} />);
-    const bodyRows = screen.getAllByRole("row").slice(1);
+    const table = screen.getByRole("table", { name: /league standings table/i });
+    const bodyRows = within(table).getAllByRole("row").slice(1);
     expect(bodyRows[0].textContent?.includes("A")).toBe(true);
   });
 
   it("shows empty state for no data", () => {
     render(<LeagueStandingsTable data={[]} />);
-    expect(screen.getByText("No standings data available.")).toBeDefined();
+    const table = screen.getByRole("table", { name: /league standings table/i });
+    expect(within(table).getByText("No standings data available.")).toBeDefined();
   });
 
   it("shows loading skeletons when loading is true", () => {
@@ -105,7 +115,8 @@ describe("LeagueStandingsTable", () => {
 
     render(<Wrapper />);
     fireEvent.click(screen.getByText("add"));
-    expect(screen.getByText("Delta")).toBeDefined();
+    const table = screen.getByRole("table", { name: /league standings table/i });
+    expect(within(table).getByText("Delta")).toBeDefined();
   });
 
   it("formats numbers using locale", () => {
@@ -113,7 +124,7 @@ describe("LeagueStandingsTable", () => {
       { position: 1, teamName: "Locale FC", played: 1000, win: 500, draw: 300, loss: 200, goalsFor: 1234, goalsAgainst: 567, points: 1500 },
     ];
     render(<LeagueStandingsTable data={big} locale="de-DE" />);
-    expect(screen.getByText("1.000")).toBeDefined();
+    const table = screen.getByRole("table", { name: /league standings table/i });
+    expect(within(table).getByText("1.000")).toBeDefined();
   });
 });
-

@@ -20,15 +20,27 @@ type PublicLayoutProps = {
 
 const setMetaTag = (selector: string, content: string | undefined) => {
   if (!content) return;
-  const el = document.querySelector<HTMLMetaElement>(selector);
-  if (!el) return;
+  let el = document.querySelector<HTMLMetaElement>(selector);
+  if (!el) {
+    const nameMatch = selector.match(/meta\[name="([^"]+)"\]/);
+    const propMatch = selector.match(/meta\[property="([^"]+)"\]/);
+    if (!nameMatch && !propMatch) return;
+    el = document.createElement("meta");
+    if (nameMatch) el.setAttribute("name", nameMatch[1]);
+    if (propMatch) el.setAttribute("property", propMatch[1]);
+    document.head.appendChild(el);
+  }
   el.setAttribute("content", content);
 };
 
 const setLinkTag = (rel: string, href: string | undefined) => {
   if (!href) return;
-  const el = document.querySelector<HTMLLinkElement>(`link[rel="${rel}"]`);
-  if (!el) return;
+  let el = document.querySelector<HTMLLinkElement>(`link[rel="${rel}"]`);
+  if (!el) {
+    el = document.createElement("link");
+    el.setAttribute("rel", rel);
+    document.head.appendChild(el);
+  }
   el.setAttribute("href", href);
 };
 

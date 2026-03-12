@@ -94,7 +94,7 @@ export default function MatchCenterPage() {
       }
     };
     load();
-  }, [id, navigate]);
+  }, [id, navigate, matchesIndexPath]);
 
   useEffect(() => {
     if (!isLive || !liveMatchId) return;
