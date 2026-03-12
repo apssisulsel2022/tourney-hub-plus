@@ -15,10 +15,11 @@ export function ShareButton({ title, text, url, variant = "outline", size = "def
   const [copied, setCopied] = React.useState(false);
 
   const onShare = useCallback(async () => {
+    const nav = typeof window !== "undefined" ? window.navigator : undefined;
     const shareData: ShareData = { title, text, url };
     try {
-      if (typeof navigator !== "undefined" && "share" in navigator) {
-        await navigator.share(shareData);
+      if (nav && "share" in nav) {
+        await nav.share(shareData);
         return;
       }
     } catch {
@@ -26,7 +27,8 @@ export function ShareButton({ title, text, url, variant = "outline", size = "def
     }
 
     try {
-      await navigator.clipboard.writeText(url);
+      if (!nav?.clipboard) throw new Error("Clipboard unavailable");
+      await nav.clipboard.writeText(url);
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1200);
       toast.success("Link copied");
@@ -48,4 +50,3 @@ export function ShareButton({ title, text, url, variant = "outline", size = "def
     </Button>
   );
 }
-

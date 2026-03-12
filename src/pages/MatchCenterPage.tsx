@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, Clock, ExternalLink, MapPin, Shield, TrendingUp, Users, Video, Zap } from "lucide-react";
 import { matchService, Match, MatchEvent, MatchLineupPlayer, MatchStatus } from "@/lib/matches";
@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip } from "recharts";
 import { MatchTimeline, MatchTimelineEvent, MatchTimelineEventType } from "@/components/MatchTimeline";
+import { ShareButton } from "@/components/public/ShareButton";
 
 const tabItems = [
   { value: "overview", label: "Overview" },
@@ -59,6 +60,9 @@ const formationRows = (formation: string) => {
 export default function MatchCenterPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isPublic = location.pathname.startsWith("/public");
+  const matchesIndexPath = isPublic ? "/public/matches" : "/matches";
   const [loading, setLoading] = useState(true);
   const [match, setMatch] = useState<Match | null>(null);
   const tickRef = useRef<number | null>(null);
@@ -73,13 +77,13 @@ export default function MatchCenterPage() {
         const matchId = id ?? (await matchService.list({ page: 1, limit: 1 })).items[0]?.id;
         if (!matchId) {
           toast.error("No matches available");
-          navigate("/matches");
+          navigate(matchesIndexPath);
           return;
         }
         const m = await matchService.getById(matchId);
         if (!m) {
           toast.error("Match not found");
-          navigate("/matches");
+          navigate(matchesIndexPath);
           return;
         }
         setMatch(m);
@@ -165,32 +169,48 @@ export default function MatchCenterPage() {
 
   if (!match) return null;
 
+  const matchDetailPath = isPublic ? `/public/matches/${match.id}` : `/matches/${match.id}`;
+  const matchCenterShareUrl = `${window.location.origin}${isPublic ? `/public/matches/${match.id}/center` : `/matches/${match.id}/center`}`;
+
   return (
-    <div className="space-y-8 max-w-[1600px] mx-auto pb-20 animate-in fade-in duration-500">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 sm:space-y-8 max-w-[1600px] mx-auto pb-24 sm:pb-20 animate-in fade-in duration-500">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
-          <Link to="/matches">
-            <Button variant="ghost" size="icon" className="rounded-full hover:bg-muted transition-colors">
+          <Link to={matchesIndexPath}>
+            <Button variant="ghost" size="icon" className="h-11 w-11 rounded-2xl hover:bg-muted transition-colors">
               <ArrowLeft className="h-5 w-5" />
             </Button>
           </Link>
-          <div className="space-y-0.5">
-            <h1 className="text-3xl font-black tracking-tight">Match Center</h1>
-            <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{match.id}</p>
+          <div className="space-y-0.5 min-w-0">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight truncate">Match Center</h1>
+            <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest truncate">{match.id}</p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <ShareButton title={`${match.home.name} vs ${match.away.name}`} text={`Match Center · ${match.tournament}`} url={matchCenterShareUrl} size="icon" />
           <Button variant="outline" className="h-11 rounded-2xl font-bold gap-2" asChild>
-            <Link to={`/matches/${match.id}`}>
+            <Link to={matchDetailPath}>
               <ExternalLink className="h-4 w-4 text-secondary" /> Match Detail
             </Link>
           </Button>
         </div>
       </div>
 
+      <div className="sm:hidden sticky top-0 z-30 -mx-4 px-4 py-3 bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/70 border-b">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <div className="text-sm font-black truncate">{match.home.name} vs {match.away.name}</div>
+            <div className="text-[11px] font-bold text-muted-foreground truncate">{match.status === "live" ? `${match.minute ?? 0}'` : dateLabel}</div>
+          </div>
+          <div className={cn("text-lg font-black tabular-nums", match.status === "live" && "text-destructive")}>
+            {match.status === "upcoming" ? "—" : `${match.score.home}-${match.score.away}`}
+          </div>
+        </div>
+      </div>
+
       <div className="relative group">
         <div className="absolute inset-0 bg-gradient-to-r from-secondary to-secondary/60 rounded-3xl blur-xl opacity-10 group-hover:opacity-20 transition-opacity" />
-        <div className="relative bg-gradient-primary rounded-3xl p-8 text-primary-foreground overflow-hidden border border-sidebar-border">
+        <div className="relative bg-gradient-primary rounded-3xl p-4 sm:p-6 md:p-8 text-primary-foreground overflow-hidden border border-sidebar-border">
           <div className="absolute top-0 right-0 p-8 opacity-5">
             <Zap className="h-64 w-64 -rotate-12" />
           </div>
@@ -214,7 +234,7 @@ export default function MatchCenterPage() {
               </div>
             </div>
 
-            <div className="flex items-center justify-center gap-6 md:gap-12">
+            <div className="flex items-center justify-center gap-4 sm:gap-6 md:gap-12">
               <div className="flex flex-col items-center gap-3 min-w-[120px]">
                 {teamIcon(match.home)}
                 <span className="font-black text-sm md:text-base text-center">{match.home.name}</span>
@@ -229,7 +249,7 @@ export default function MatchCenterPage() {
                       animate={{ y: 0, opacity: 1 }}
                       exit={{ y: 10, opacity: 0 }}
                       transition={{ duration: 0.18 }}
-                      className={cn("text-5xl md:text-6xl font-black tracking-tighter", match.status === "live" && "text-destructive")}
+                      className={cn("text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter", match.status === "live" && "text-destructive")}
                       aria-label="Home score"
                     >
                       {match.status === "upcoming" ? "—" : match.score.home}
@@ -243,7 +263,7 @@ export default function MatchCenterPage() {
                       animate={{ y: 0, opacity: 1 }}
                       exit={{ y: 10, opacity: 0 }}
                       transition={{ duration: 0.18 }}
-                      className={cn("text-5xl md:text-6xl font-black tracking-tighter", match.status === "live" && "text-destructive")}
+                      className={cn("text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter", match.status === "live" && "text-destructive")}
                       aria-label="Away score"
                     >
                       {match.status === "upcoming" ? "—" : match.score.away}
@@ -273,18 +293,18 @@ export default function MatchCenterPage() {
 
       <Tabs defaultValue="overview" className="w-full">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <TabsList className="rounded-2xl h-12">
+          <TabsList className="rounded-2xl h-12 w-full md:w-auto overflow-x-auto justify-start [-webkit-overflow-scrolling:touch]">
             {tabItems.map((t) => (
-              <TabsTrigger key={t.value} value={t.value} className="rounded-xl font-black text-xs uppercase tracking-widest">
+              <TabsTrigger key={t.value} value={t.value} className="rounded-xl font-black text-xs uppercase tracking-widest min-w-[120px] h-11">
                 {t.label}
               </TabsTrigger>
             ))}
           </TabsList>
           <div className="flex items-center gap-2">
-            <Button variant="outline" className="h-10 rounded-2xl font-bold gap-2">
+            <Button variant="outline" className="h-11 rounded-2xl font-bold gap-2">
               <Video className="h-4 w-4 text-secondary" /> VAR Log
             </Button>
-            <Button variant="outline" className="h-10 rounded-2xl font-bold gap-2">
+            <Button variant="outline" className="h-11 rounded-2xl font-bold gap-2">
               <TrendingUp className="h-4 w-4 text-secondary" /> Refresh Stats
             </Button>
           </div>

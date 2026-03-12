@@ -3,6 +3,7 @@ import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 export type StandingsSortDirection = "asc" | "desc";
 
@@ -222,7 +223,122 @@ export function LeagueStandingsTable({
 
   return (
     <div className="bg-card rounded-3xl border shadow-sm overflow-hidden">
-      <div className="overflow-x-auto">
+      <div className="sm:hidden">
+        <div className="p-4 border-b bg-muted/20">
+          <div className="flex items-center justify-between gap-2">
+            <div className="text-xs font-black uppercase tracking-widest text-muted-foreground">Sort</div>
+            <div className="flex gap-2 overflow-x-auto py-1 [-webkit-overflow-scrolling:touch]">
+              <Button
+                type="button"
+                variant={sortKey === "points" ? "default" : "outline"}
+                className={cn("h-11 rounded-2xl font-bold", sortKey === "points" && "bg-secondary hover:bg-secondary/90 text-white")}
+                onClick={() => toggleSort("points")}
+              >
+                {t.points} {sortIcon("points")}
+              </Button>
+              <Button
+                type="button"
+                variant={sortKey === "teamName" ? "default" : "outline"}
+                className={cn("h-11 rounded-2xl font-bold", sortKey === "teamName" && "bg-secondary hover:bg-secondary/90 text-white")}
+                onClick={() => toggleSort("teamName")}
+              >
+                {t.team} {sortIcon("teamName")}
+              </Button>
+              <Button
+                type="button"
+                variant={sortKey === "position" ? "default" : "outline"}
+                className={cn("h-11 rounded-2xl font-bold", sortKey === "position" && "bg-secondary hover:bg-secondary/90 text-white")}
+                onClick={() => toggleSort("position")}
+              >
+                {t.position} {sortIcon("position")}
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="p-4 space-y-3">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <Skeleton key={i} className="h-16 rounded-2xl" />
+            ))}
+          </div>
+        ) : sortedData.length === 0 ? (
+          <div className="p-10 text-center text-sm text-muted-foreground font-medium">{t.empty}</div>
+        ) : (
+          <Accordion type="single" collapsible className="divide-y">
+            {sortedData.map((row) => {
+              const gd = row.goalsFor - row.goalsAgainst;
+              return (
+                <AccordionItem
+                  key={`${row.teamName}-${row.position}`}
+                  value={`${row.teamName}-${row.position}`}
+                  className={cn("px-4", rowHighlightClass(row.position))}
+                >
+                  <AccordionTrigger className="py-4 hover:no-underline">
+                    <div className="flex items-center justify-between w-full gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="text-xs font-black text-muted-foreground tabular-nums w-10 shrink-0">{positionLabel(row.position)}</div>
+                        {row.teamLogoUrl ? (
+                          <img
+                            src={row.teamLogoUrl}
+                            alt={row.teamName}
+                            className="h-9 w-9 rounded-xl object-contain bg-muted p-1 shrink-0"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="h-9 w-9 rounded-xl bg-muted flex items-center justify-center text-[10px] font-black shrink-0">
+                            {row.teamName.slice(0, 2).toUpperCase()}
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <div className="text-sm font-black truncate">{row.teamName}</div>
+                          <div className="text-xs text-muted-foreground font-bold tabular-nums">
+                            P {numberFmt.format(row.played)} · GD {gd >= 0 ? "+" : ""}{numberFmt.format(gd)}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <div className="text-lg font-black tabular-nums">{numberFmt.format(row.points)}</div>
+                        <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t.points}</div>
+                      </div>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="rounded-2xl border bg-background/60 p-3">
+                        <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t.win}</div>
+                        <div className="text-sm font-black tabular-nums">{numberFmt.format(row.win)}</div>
+                      </div>
+                      <div className="rounded-2xl border bg-background/60 p-3">
+                        <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t.draw}</div>
+                        <div className="text-sm font-black tabular-nums">{numberFmt.format(row.draw)}</div>
+                      </div>
+                      <div className="rounded-2xl border bg-background/60 p-3">
+                        <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t.loss}</div>
+                        <div className="text-sm font-black tabular-nums">{numberFmt.format(row.loss)}</div>
+                      </div>
+                      <div className="rounded-2xl border bg-background/60 p-3">
+                        <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t.goalsFor}</div>
+                        <div className="text-sm font-black tabular-nums">{numberFmt.format(row.goalsFor)}</div>
+                      </div>
+                      <div className="rounded-2xl border bg-background/60 p-3">
+                        <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t.goalsAgainst}</div>
+                        <div className="text-sm font-black tabular-nums">{numberFmt.format(row.goalsAgainst)}</div>
+                      </div>
+                      <div className="rounded-2xl border bg-background/60 p-3">
+                        <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t.played}</div>
+                        <div className="text-sm font-black tabular-nums">{numberFmt.format(row.played)}</div>
+                      </div>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              );
+            })}
+          </Accordion>
+        )}
+      </div>
+
+      <div className="hidden sm:block overflow-x-auto">
         <div className="overflow-y-auto" style={{ maxHeight: maxHeightPx }}>
           <table className="w-full min-w-[920px]" aria-label={t.tableAriaLabel}>
             <thead className="sticky top-0 z-10 bg-muted/70 backdrop-blur supports-[backdrop-filter]:bg-muted/50 border-b">

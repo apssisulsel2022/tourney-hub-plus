@@ -13,6 +13,7 @@ export interface Player {
 export interface Team {
   id: string;
   name: string;
+  city: string;
   logo?: string;
   description?: string;
   foundingDate: string;

@@ -58,7 +58,7 @@ const PublicBottomNav = ({ tournamentName }: { tournamentName?: string }) => {
 
   return (
     <div className="sm:hidden fixed inset-x-0 bottom-0 z-50 border-t bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/70">
-      <nav className="container h-16 px-2" aria-label="Primary">
+      <nav className="container h-16 px-2" aria-label="Primary mobile">
         <div className="grid grid-cols-5 h-full items-center">
           {items.map((item) => {
             const Icon = item.icon;
@@ -132,8 +132,8 @@ export default function PublicLayout({ seo, tournamentName = "Premier Cup 2026",
     setMetaTag('meta[name="description"]', seo.description);
     setMetaTag('meta[property="og:title"]', seo.title);
     setMetaTag('meta[property="og:description"]', seo.description);
-    setMetaTag('meta[property="twitter:title"]', seo.title);
-    setMetaTag('meta[property="twitter:description"]', seo.description);
+    setMetaTag('meta[name="twitter:title"]', seo.title);
+    setMetaTag('meta[name="twitter:description"]', seo.description);
     if (seo.imageUrl) {
       setMetaTag('meta[property="og:image"]', seo.imageUrl);
       setMetaTag('meta[name="twitter:image"]', seo.imageUrl);
@@ -207,4 +207,3 @@ export default function PublicLayout({ seo, tournamentName = "Premier Cup 2026",
     </div>
   );
 }
-
