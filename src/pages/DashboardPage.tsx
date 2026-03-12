@@ -1,105 +1,191 @@
-import { Trophy, Users, Swords, Calendar, TrendingUp } from "lucide-react";
+import React from "react";
+import { Trophy, Users, Swords, Calendar, Download, Plus, UserPlus, CalendarDays, MapPin, Activity } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
-import { MatchCard } from "@/components/dashboard/MatchCard";
 import { QuickActions } from "@/components/dashboard/QuickActions";
-import { StatusBadge } from "@/components/ui/StatusBadge";
+import { TournamentCard, TournamentCardProps } from "@/components/dashboard/TournamentCard";
+import { DashboardTimeline } from "@/components/dashboard/DashboardTimeline";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { useRealtime } from "@/modules/realtime/hooks/useRealtime";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
-const tournaments = [
-  { name: "Premier Cup 2026", teams: 16, status: "active" as const, dates: "Mar 1 – Apr 15", category: "U-21" },
-  { name: "City League Season 8", teams: 12, status: "active" as const, dates: "Feb 10 – Jun 30", category: "Senior" },
-  { name: "Youth Championship", teams: 24, status: "upcoming" as const, dates: "Apr 1 – May 20", category: "U-17" },
-];
-
-const matches = [
-  { homeTeam: "FC Thunder", awayTeam: "Red Lions", homeScore: 2, awayScore: 1, time: "65'", venue: "National Stadium", status: "live" as const, tournament: "Premier Cup 2026" },
-  { homeTeam: "Blue Eagles", awayTeam: "Golden Stars", time: "18:00", venue: "City Arena", status: "upcoming" as const, tournament: "Premier Cup 2026" },
-  { homeTeam: "United FC", awayTeam: "Dynamo City", time: "20:30", venue: "Olympic Park", status: "upcoming" as const, tournament: "City League" },
-  { homeTeam: "Phoenix SC", awayTeam: "Metro FC", homeScore: 3, awayScore: 0, time: "FT", venue: "Phoenix Ground", status: "completed" as const, tournament: "City League" },
+const activeTournaments: TournamentCardProps[] = [
+  {
+    name: "Premier Cup 2026",
+    category: "Adult",
+    teamsCount: 14,
+    maxTeams: 16,
+    status: "active",
+    startDate: "Mar 1",
+    endDate: "Apr 15, 2026",
+  },
+  {
+    name: "Youth Championship",
+    category: "U16",
+    teamsCount: 24,
+    maxTeams: 24,
+    status: "active",
+    startDate: "Apr 1",
+    endDate: "May 20, 2026",
+  },
+  {
+    name: "City League Season 8",
+    category: "Adult",
+    teamsCount: 8,
+    maxTeams: 12,
+    status: "upcoming",
+    startDate: "May 10",
+    endDate: "Jun 30, 2026",
+  },
 ];
 
 export default function DashboardPage() {
+  const { status, dashboardStats, recentActivities } = useRealtime();
+
+  const getStatusColor = () => {
+    switch (status) {
+      case 'connected': return 'text-green-500 bg-green-500/10 border-green-500/20';
+      case 'connecting': return 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20';
+      case 'error': return 'text-red-500 bg-red-500/10 border-red-500/20';
+      default: return 'text-secondary bg-secondary/10 border-secondary/20';
+    }
+  };
+
   return (
-    <div className="space-y-6">
-      {/* Page header */}
-      <div className="page-header">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground">Welcome back! Here's your tournament overview.</p>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard title="Active Tournaments" value={3} change="+1 this month" changeType="positive" icon={Trophy} />
-        <StatCard title="Teams Registered" value={52} change="+8 this week" changeType="positive" icon={Users} />
-        <StatCard title="Matches Today" value={6} change="2 live now" changeType="neutral" icon={Swords} iconColor="bg-destructive/10" />
-        <StatCard title="Upcoming Matches" value={14} change="Next 7 days" changeType="neutral" icon={Calendar} />
-      </div>
-
-      {/* Quick Actions */}
-      <div>
-        <h2 className="text-lg font-semibold mb-3">Quick Actions</h2>
-        <QuickActions />
-      </div>
-
-      {/* Content grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Matches */}
-        <div className="lg:col-span-2 space-y-3">
-          <div className="section-header">
-            <h2 className="text-lg font-semibold">Today's Matches</h2>
-            <a href="/matches" className="text-sm text-secondary hover:underline font-medium">View all</a>
+    <div className="space-y-8 max-w-[1600px] mx-auto pb-10">
+      {/* Header with Export */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Event Organizer Dashboard</h1>
+          <p className="text-muted-foreground mt-1">Real-time overview of your sports operations</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="gap-2">
+                <Download className="h-4 w-4" /> Export Data
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem className="cursor-pointer">Export as CSV</DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer">Export as PDF</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <div className={cn("hidden sm:flex items-center gap-2 text-xs font-bold px-3 py-2 rounded-lg border", getStatusColor())}>
+            <span className="relative flex h-2 w-2">
+              {status === 'connected' && (
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-current opacity-75"></span>
+              )}
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-current"></span>
+            </span>
+            {status === 'connected' ? 'LIVE SYNC ACTIVE' : status.toUpperCase()}
           </div>
-          <div className="space-y-3">
-            {matches.map((m, i) => (
-              <MatchCard key={i} {...m} />
-            ))}
+        </div>
+      </div>
+
+      {/* Primary Widgets */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard 
+          title="Active Tournaments" 
+          value={dashboardStats.activeTournaments || 0} 
+          change="+1 vs last month" 
+          changeType="positive" 
+          icon={Trophy} 
+        />
+        <StatCard 
+          title="Registered Teams" 
+          value={dashboardStats.registeredTeams || 0} 
+          change="Breakdown by tourney" 
+          changeType="neutral" 
+          icon={Users} 
+        />
+        <StatCard 
+          title="Matches Today" 
+          value={dashboardStats.matchesToday || 0} 
+          change={`${dashboardStats.liveMatches || 0} live at National Stadium`} 
+          changeType="positive" 
+          icon={Swords} 
+          iconColor="bg-destructive/10" 
+        />
+        <StatCard 
+          title="Upcoming (7 Days)" 
+          value={14} 
+          change="Next: United vs Dynamo" 
+          changeType="neutral" 
+          icon={Calendar} 
+        />
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        <div className="xl:col-span-2 space-y-8">
+          {/* Quick Actions Control Center */}
+          <div className="bg-card rounded-xl border p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold">Quick Actions</h2>
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Control Center</span>
+            </div>
+            <QuickActions />
+          </div>
+
+          {/* Active Tournaments Grid */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold">My Active Tournaments</h2>
+              <Button variant="link" className="text-secondary font-bold">View All</Button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4">
+              {activeTournaments.map((tournament) => (
+                <TournamentCard key={tournament.name} {...tournament} />
+              ))}
+            </div>
+          </div>
+
+          {/* Timeline Section */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold">Daily Match Schedule</h2>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" className="h-8">Filter</Button>
+                <Button variant="outline" size="sm" className="h-8">Today</Button>
+              </div>
+            </div>
+            <DashboardTimeline />
           </div>
         </div>
 
-        {/* Tournaments sidebar */}
-        <div className="space-y-3">
-          <div className="section-header">
-            <h2 className="text-lg font-semibold">Tournaments</h2>
-            <a href="/tournaments" className="text-sm text-secondary hover:underline font-medium">View all</a>
-          </div>
-          {tournaments.map((t, i) => (
-            <div key={i} className="stat-card cursor-pointer">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="font-semibold text-sm">{t.name}</h3>
-                <StatusBadge status={t.status} />
-              </div>
-              <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                <span>{t.teams} teams</span>
-                <span>{t.category}</span>
-                <span>{t.dates}</span>
-              </div>
+        {/* Sidebar Insights */}
+        <div className="space-y-6">
+          <div className="bg-card rounded-xl border p-6 shadow-sm">
+            <div className="flex items-center gap-2 mb-6">
+              <Activity className="h-5 w-5 text-secondary" />
+              <h2 className="text-lg font-bold">Live Activity Feed</h2>
             </div>
-          ))}
-
-          {/* Top scorers mini */}
-          <div className="mt-4">
-            <h2 className="text-lg font-semibold mb-3">Top Scorers</h2>
-            <div className="stat-card">
-              {[
-                { name: "Carlos Silva", team: "FC Thunder", goals: 8 },
-                { name: "James Wilson", team: "Red Lions", goals: 6 },
-                { name: "Ahmed Hassan", team: "Phoenix SC", goals: 5 },
-                { name: "Luca Romano", team: "United FC", goals: 5 },
-              ].map((p, i) => (
-                <div key={i} className="flex items-center justify-between py-2 border-b last:border-0">
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-bold text-muted-foreground w-5">{i + 1}</span>
-                    <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-bold">
-                      {p.name.split(" ").map(n => n[0]).join("")}
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">{p.name}</p>
-                      <p className="text-xs text-muted-foreground">{p.team}</p>
-                    </div>
-                  </div>
-                  <span className="text-sm font-bold text-secondary">{p.goals}</span>
+            <div className="space-y-6">
+              {recentActivities?.map((activity) => (
+                <div key={activity.id} className="relative pl-6 pb-6 last:pb-0 border-l border-muted last:border-0">
+                  <div className="absolute left-[-5px] top-1 h-2.5 w-2.5 rounded-full bg-secondary" />
+                  <p className="text-sm font-medium">{activity.message}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {new Date(activity.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </p>
                 </div>
               ))}
+              {(!recentActivities || recentActivities.length === 0) && (
+                <p className="text-sm text-muted-foreground italic">No recent activity</p>
+              )}
             </div>
+          </div>
+
+          <div className="bg-secondary/5 rounded-xl border border-secondary/10 p-6">
+            <h3 className="font-bold mb-2">Platform Pro Tip</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Use the "Generate Schedule" tool to automatically resolve venue conflicts and referee overlaps.
+            </p>
           </div>
         </div>
       </div>

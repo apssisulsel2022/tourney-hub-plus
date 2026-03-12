@@ -1,78 +1,48 @@
-import { Trophy } from "lucide-react";
-import { cn } from "@/lib/utils";
-
-const standingsData = [
-  { pos: 1, team: "FC Thunder", p: 10, w: 8, d: 1, l: 1, gf: 24, ga: 8, pts: 25 },
-  { pos: 2, team: "Red Lions", p: 10, w: 7, d: 2, l: 1, gf: 20, ga: 10, pts: 23 },
-  { pos: 3, team: "Blue Eagles", p: 10, w: 6, d: 2, l: 2, gf: 18, ga: 12, pts: 20 },
-  { pos: 4, team: "Golden Stars", p: 10, w: 5, d: 3, l: 2, gf: 16, ga: 11, pts: 18 },
-  { pos: 5, team: "United FC", p: 10, w: 4, d: 3, l: 3, gf: 14, ga: 13, pts: 15 },
-  { pos: 6, team: "Dynamo City", p: 10, w: 3, d: 2, l: 5, gf: 12, ga: 16, pts: 11 },
-  { pos: 7, team: "Phoenix SC", p: 10, w: 2, d: 1, l: 7, gf: 9, ga: 20, pts: 7 },
-  { pos: 8, team: "Metro FC", p: 10, w: 1, d: 0, l: 9, gf: 5, ga: 28, pts: 3 },
-];
+import React, { useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
+import PublicLayout from "@/components/layout/PublicLayout";
+import { LeagueStandingsTable } from "@/components/LeagueStandingsTable";
+import { standingsService } from "@/lib/standings";
+import { ShareButton } from "@/components/public/ShareButton";
 
 export default function PublicStandingsPage() {
+  const standingsQuery = useQuery({
+    queryKey: ["public", "standings"],
+    queryFn: standingsService.get,
+    refetchInterval: 30000,
+    staleTime: 15000,
+  });
+
+  const retry = useCallback(() => {
+    standingsQuery.refetch();
+  }, [standingsQuery]);
+
   return (
-    <div className="min-h-screen bg-background">
-      <nav className="border-b bg-card">
-        <div className="container flex h-14 items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-secondary">
-            <Trophy className="h-4 w-4 text-secondary-foreground" />
+    <PublicLayout
+      seo={{
+        title: "Standings · Premier Cup 2026",
+        description: "Live league table and tournament rankings.",
+        imageUrl: `${window.location.origin}/placeholder.svg`,
+      }}
+      tournamentName="Premier Cup 2026"
+    >
+      <div className="space-y-6 max-w-5xl mx-auto">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+          <div className="space-y-1">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight">Standings</h1>
+            <p className="text-sm text-muted-foreground">Sorted by points, then goal difference, then goals scored.</p>
           </div>
-          <span className="font-bold">KickOff</span>
-          <span className="text-muted-foreground mx-2">·</span>
-          <span className="text-sm text-muted-foreground">Premier Cup 2026</span>
+          <ShareButton title="Premier Cup 2026 Standings" text="League table and rankings" url={`${window.location.origin}/public/standings`} />
         </div>
-      </nav>
 
-      <div className="container py-8 max-w-4xl">
-        <h1 className="text-2xl font-bold mb-6">League Table</h1>
-
-        <div className="bg-card rounded-lg border overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b bg-muted/50">
-                  <th className="data-table-header px-4 py-3 text-center w-12">#</th>
-                  <th className="data-table-header px-4 py-3 text-left">Team</th>
-                  <th className="data-table-header px-4 py-3 text-center">P</th>
-                  <th className="data-table-header px-4 py-3 text-center">W</th>
-                  <th className="data-table-header px-4 py-3 text-center">D</th>
-                  <th className="data-table-header px-4 py-3 text-center">L</th>
-                  <th className="data-table-header px-4 py-3 text-center hidden sm:table-cell">GF</th>
-                  <th className="data-table-header px-4 py-3 text-center hidden sm:table-cell">GA</th>
-                  <th className="data-table-header px-4 py-3 text-center font-bold">PTS</th>
-                </tr>
-              </thead>
-              <tbody>
-                {standingsData.map((row) => (
-                  <tr key={row.pos} className={cn(
-                    "border-b last:border-0 hover:bg-muted/30 transition-colors",
-                    row.pos <= 2 && "border-l-2 border-l-success",
-                    row.pos >= 7 && "border-l-2 border-l-destructive"
-                  )}>
-                    <td className="px-4 py-3.5 text-center text-sm font-bold">{row.pos}</td>
-                    <td className="px-4 py-3.5">
-                      <div className="flex items-center gap-3">
-                        <div className="h-7 w-7 rounded-full bg-muted flex items-center justify-center text-[10px] font-bold">{row.team.slice(0, 2).toUpperCase()}</div>
-                        <span className="font-medium text-sm">{row.team}</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3.5 text-center text-sm">{row.p}</td>
-                    <td className="px-4 py-3.5 text-center text-sm">{row.w}</td>
-                    <td className="px-4 py-3.5 text-center text-sm">{row.d}</td>
-                    <td className="px-4 py-3.5 text-center text-sm">{row.l}</td>
-                    <td className="px-4 py-3.5 text-center text-sm hidden sm:table-cell">{row.gf}</td>
-                    <td className="px-4 py-3.5 text-center text-sm hidden sm:table-cell">{row.ga}</td>
-                    <td className="px-4 py-3.5 text-center text-sm font-bold">{row.pts}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <LeagueStandingsTable
+          data={standingsQuery.data ?? []}
+          loading={standingsQuery.isLoading}
+          error={standingsQuery.isError ? "Unable to load standings." : null}
+          onRetry={retry}
+          locale="en-US"
+        />
       </div>
-    </div>
+    </PublicLayout>
   );
 }

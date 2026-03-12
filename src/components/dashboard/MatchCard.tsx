@@ -8,7 +8,7 @@ interface MatchCardProps {
   awayScore?: number;
   time: string;
   venue: string;
-  status: "live" | "upcoming" | "completed";
+  status: "live" | "upcoming" | "completed" | "delayed";
   tournament?: string;
 }
 
@@ -29,7 +29,7 @@ export function MatchCard({ homeTeam, awayTeam, homeScore, awayScore, time, venu
 
         {/* Score / Time */}
         <div className="flex flex-col items-center px-4 min-w-[80px]">
-          {status === "upcoming" ? (
+          {status === "upcoming" || status === "delayed" ? (
             <span className="text-sm font-semibold text-muted-foreground">{time}</span>
           ) : (
             <div className="flex items-center gap-2">
