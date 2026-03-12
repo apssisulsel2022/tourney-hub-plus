@@ -227,8 +227,8 @@ export const buildDemoVenues = (count = 120): Venue[] => {
   });
 };
 
-let venueStorage: Venue[] = buildDemoVenues(140);
-let bookingStorage: VenueBooking[] = [];
+const venueStorage: Venue[] = buildDemoVenues(140);
+const bookingStorage: VenueBooking[] = [];
 
 const overlaps = (aStart: number, aEnd: number, bStart: number, bEnd: number) => Math.max(aStart, bStart) < Math.min(aEnd, bEnd);
 
@@ -303,4 +303,3 @@ export const venueService = {
     mk(new Date(day0.getTime() + 24 * 60 * 60 * 1000), 4, 2, "booked", "Academy");
   },
 };
-

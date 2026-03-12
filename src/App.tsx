@@ -25,7 +25,8 @@ import MatchCenterPage from "@/pages/MatchCenterPage";
 import MatchDetailPage from "@/pages/matches/MatchDetailPage";
 import MatchReportPage from "@/pages/matches/MatchReportPage";
 import VenuesPage from "@/pages/VenuesPage";
-import VenueDetailPage from "@/pages/venues/VenueDetailPage";
+import VenueProfilePage from "@/pages/venues/VenueProfilePage";
+import VenueSchedulePage from "@/pages/venues/VenueSchedulePage";
 import RefereesPage from "@/pages/RefereesPage";
 import RefereeProfilePage from "@/pages/referees/RefereeProfilePage";
 import RefereeAssignmentPage from "@/pages/referees/RefereeAssignmentPage";
@@ -131,7 +132,8 @@ const App = () => (
 
           {/* Venues */}
           <Route path="/venues" element={<DL><VenuesPage /></DL>} />
-          <Route path="/venues/detail" element={<DL><VenueDetailPage /></DL>} />
+          <Route path="/venues/:id" element={<DL><VenueProfilePage /></DL>} />
+          <Route path="/venues/:id/schedule" element={<DL><VenueSchedulePage /></DL>} />
 
           {/* Referees */}
           <Route path="/referees" element={<DL><RefereesPage /></DL>} />
