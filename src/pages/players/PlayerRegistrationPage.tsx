@@ -1,103 +1,94 @@
-import { ArrowLeft, Upload } from "lucide-react";
-import { Link } from "react-router-dom";
+import React from "react";
+import { ArrowLeft, Shield, ChevronRight, CheckCircle2, UserPlus } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { PlayerRegistrationForm } from "@/modules/players/components/PlayerRegistrationForm";
+import { playerService } from "@/modules/players/services/playerService";
+import { CreatePlayerInput } from "@/modules/players/types/player";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 export default function PlayerRegistrationPage() {
+  const navigate = useNavigate();
+
+  const handleCancel = () => {
+    navigate("/players");
+  };
+
+  const handleFinalSubmit = async (data: CreatePlayerInput) => {
+    try {
+      await playerService.createPlayer(data);
+      toast.success("Player registered successfully!", {
+        description: `${data.name} is now registered for the 2026 season.`,
+      });
+      navigate("/players");
+    } catch (error) {
+      toast.error("Failed to register player");
+      console.error(error);
+    }
+  };
+
   return (
-    <div className="space-y-6 max-w-3xl">
-      <div className="flex items-center gap-3">
-        <Link to="/players" className="text-muted-foreground hover:text-foreground"><ArrowLeft className="h-5 w-5" /></Link>
-        <div>
-          <h1 className="text-2xl font-bold">Register Player</h1>
-          <p className="text-muted-foreground">Add a new player to the system</p>
+    <div className="space-y-10 max-w-[1600px] mx-auto pb-20 animate-in fade-in duration-500">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2 text-xs font-black text-muted-foreground uppercase tracking-widest">
+            <Link to="/players" className="hover:text-secondary transition-colors">Player Database</Link>
+            <ChevronRight className="h-3 w-3" />
+            <span className="text-foreground">Registration</span>
+          </div>
+          <h1 className="text-4xl font-black tracking-tighter flex items-center gap-3">
+            <UserPlus className="h-10 w-10 text-secondary" />
+            Athlete Onboarding
+          </h1>
+          <p className="text-muted-foreground font-medium max-w-2xl">
+            Complete the multi-step registration process to enroll a new player into the platform. 
+            All documents will be verified by the league administration.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Link to="/players">
+            <Button variant="ghost" className="h-11 px-6 rounded-2xl font-black text-xs uppercase tracking-widest gap-2">
+              <ArrowLeft className="h-4 w-4" /> BACK TO DATABASE
+            </Button>
+          </Link>
         </div>
       </div>
 
-      <div className="bg-card rounded-xl border p-6 space-y-6">
-        <div className="flex items-center gap-6">
-          <div className="h-20 w-20 rounded-full border-2 border-dashed flex items-center justify-center cursor-pointer hover:border-secondary transition-colors">
-            <Upload className="h-8 w-8 text-muted-foreground" />
-          </div>
-          <div>
-            <p className="font-medium">Player Photo</p>
-            <p className="text-sm text-muted-foreground">Upload a headshot photo</p>
-          </div>
-        </div>
+      {/* Registration Steps */}
+      <PlayerRegistrationForm 
+        onSubmit={handleFinalSubmit}
+        onCancel={handleCancel}
+      />
 
-        <h3 className="font-semibold border-b pb-2">Personal Information</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="text-sm font-medium mb-1.5 block">First Name *</label>
-            <input type="text" placeholder="Carlos" className="h-11 w-full rounded-lg border bg-background px-4 text-sm outline-none focus:border-secondary focus:ring-1 focus:ring-secondary" />
+      {/* Trust and Verification Footer */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+        <div className="flex items-center gap-4 p-6 bg-secondary/5 rounded-3xl border border-secondary/10 shadow-sm">
+          <div className="h-14 w-14 rounded-2xl bg-secondary/10 flex items-center justify-center shrink-0">
+            <Shield className="h-7 w-7 text-secondary" />
           </div>
-          <div>
-            <label className="text-sm font-medium mb-1.5 block">Last Name *</label>
-            <input type="text" placeholder="Silva" className="h-11 w-full rounded-lg border bg-background px-4 text-sm outline-none focus:border-secondary focus:ring-1 focus:ring-secondary" />
-          </div>
-          <div>
-            <label className="text-sm font-medium mb-1.5 block">Date of Birth *</label>
-            <input type="date" className="h-11 w-full rounded-lg border bg-background px-4 text-sm outline-none focus:border-secondary" />
-          </div>
-          <div>
-            <label className="text-sm font-medium mb-1.5 block">Nationality *</label>
-            <input type="text" placeholder="Brazilian" className="h-11 w-full rounded-lg border bg-background px-4 text-sm outline-none focus:border-secondary focus:ring-1 focus:ring-secondary" />
-          </div>
-        </div>
-
-        <h3 className="font-semibold border-b pb-2">Football Details</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="text-sm font-medium mb-1.5 block">Position *</label>
-            <select className="h-11 w-full rounded-lg border bg-background px-4 text-sm outline-none focus:border-secondary">
-              <option>Goalkeeper</option><option>Defender</option><option>Midfielder</option><option>Forward</option>
-            </select>
-          </div>
-          <div>
-            <label className="text-sm font-medium mb-1.5 block">Jersey Number *</label>
-            <input type="number" placeholder="9" className="h-11 w-full rounded-lg border bg-background px-4 text-sm outline-none focus:border-secondary" />
-          </div>
-          <div>
-            <label className="text-sm font-medium mb-1.5 block">Team *</label>
-            <select className="h-11 w-full rounded-lg border bg-background px-4 text-sm outline-none focus:border-secondary">
-              <option>Select team...</option><option>FC Thunder</option><option>Red Lions</option><option>Blue Eagles</option>
-            </select>
-          </div>
-          <div>
-            <label className="text-sm font-medium mb-1.5 block">Preferred Foot</label>
-            <select className="h-11 w-full rounded-lg border bg-background px-4 text-sm outline-none focus:border-secondary">
-              <option>Right</option><option>Left</option><option>Both</option>
-            </select>
-          </div>
-        </div>
-
-        <h3 className="font-semibold border-b pb-2">Physical Data</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="text-sm font-medium mb-1.5 block">Height (cm)</label>
-            <input type="number" placeholder="182" className="h-11 w-full rounded-lg border bg-background px-4 text-sm outline-none focus:border-secondary" />
-          </div>
-          <div>
-            <label className="text-sm font-medium mb-1.5 block">Weight (kg)</label>
-            <input type="number" placeholder="76" className="h-11 w-full rounded-lg border bg-background px-4 text-sm outline-none focus:border-secondary" />
-          </div>
-        </div>
-
-        <h3 className="font-semibold border-b pb-2">Documents</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {["ID Document", "Medical Certificate"].map((doc) => (
-            <div key={doc} className="border-2 border-dashed rounded-lg p-4 flex items-center gap-3 cursor-pointer hover:border-secondary transition-colors">
-              <Upload className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="text-sm font-medium">{doc}</p>
-                <p className="text-xs text-muted-foreground">PDF, JPG (max 5MB)</p>
-              </div>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-black uppercase tracking-tight">Security Protocol</p>
+              <Badge variant="outline" className="text-[9px] font-black border-secondary/30 text-secondary">ENCRYPTED</Badge>
             </div>
-          ))}
+            <p className="text-xs text-muted-foreground font-medium">All personal data and documents are stored securely using industry-standard encryption protocols.</p>
+          </div>
         </div>
 
-        <div className="flex items-center justify-end gap-3 pt-4 border-t">
-          <Button variant="ghost">Cancel</Button>
-          <Button variant="success">Register Player</Button>
+        <div className="flex items-center gap-4 p-6 bg-success/5 rounded-3xl border border-success/10 shadow-sm">
+          <div className="h-14 w-14 rounded-2xl bg-success/10 flex items-center justify-center shrink-0">
+            <CheckCircle2 className="h-7 w-7 text-success" />
+          </div>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-black uppercase tracking-tight">Instant Eligibility</p>
+              <Badge variant="outline" className="text-[9px] font-black border-success/30 text-success">VERIFIED</Badge>
+            </div>
+            <p className="text-xs text-muted-foreground font-medium">Players become eligible for match selection immediately after administrative verification of documents.</p>
+          </div>
         </div>
       </div>
     </div>

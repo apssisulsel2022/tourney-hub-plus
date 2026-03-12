@@ -1,11 +1,11 @@
-import { SocketEvent, SocketStatus, DashboardUpdatePayload } from '../types/socket';
+import { SocketEvent, SocketStatus, DashboardUpdatePayload, RealtimeActivityType } from '../types/socket';
 
 type EventHandler = (event: SocketEvent) => void;
 
 class SocketService {
   private status: SocketStatus = 'disconnected';
   private handlers: Set<EventHandler> = new Set();
-  private mockInterval: any = null;
+  private mockInterval: ReturnType<typeof setInterval> | null = null;
 
   constructor() {
     this.connect();
@@ -75,7 +75,7 @@ class SocketService {
         };
       } else if (rand < 0.7) {
         // Recent activity update
-        const activities = [
+        const activities: Array<{ type: RealtimeActivityType; msg: string }> = [
           { type: 'match_started', msg: 'New match started: Team A vs Team B' },
           { type: 'team_registered', msg: 'New team registered: FC Barcelona' },
           { type: 'score_updated', msg: 'Score updated: Team C 2 - 1 Team D' },
@@ -85,7 +85,7 @@ class SocketService {
         const payload: DashboardUpdatePayload = {
           recentActivity: [{
             id: Math.random().toString(36).substr(2, 9),
-            type: activity.type as any,
+            type: activity.type,
             message: activity.msg,
             timestamp: new Date().toISOString()
           }]

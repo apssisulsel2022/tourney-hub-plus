@@ -35,9 +35,7 @@ describe("TournamentsPage", () => {
       </BrowserRouter>
     );
     
-    // Find list view button by icon/aria-label if possible, or just look for the table after click
-    const listButton = screen.getAllByRole("button").find(b => b.innerHTML.includes("svg")); // Simplification
-    if (listButton) fireEvent.click(listButton);
+    fireEvent.click(screen.getByLabelText("List view"));
     
     // In list mode, we expect a table header
     expect(screen.getByText("Tournament Name")).toBeDefined();

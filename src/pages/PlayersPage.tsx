@@ -1,124 +1,320 @@
-import { Search, Filter } from "lucide-react";
+import React, { useState, useEffect, useCallback } from "react";
+import { Plus, Download, LayoutGrid, List, RefreshCw, FileText, ChevronRight, ChevronLeft } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { playerService } from "@/modules/players/services/playerService";
+import { Player, AgeCategory, Position } from "@/modules/players/types/player";
+import { PlayerFilters } from "@/modules/players/components/PlayerFilters";
+import { PlayerTable } from "@/modules/players/components/PlayerTable";
+import { DigitalPlayerCard } from "@/modules/players/components/DigitalPlayerCard";
 import { Button } from "@/components/ui/button";
-import { StatusBadge } from "@/components/ui/StatusBadge";
-
-const players = [
-  { name: "Carlos Silva", club: "FC Thunder", pos: "ST", age: 24, mp: 10, goals: 8, assists: 3, nationality: "Brazil" },
-  { name: "James Wilson", club: "Red Lions", pos: "ST", age: 22, mp: 10, goals: 6, assists: 5, nationality: "England" },
-  { name: "Ahmed Hassan", club: "Phoenix SC", pos: "AM", age: 26, mp: 9, goals: 5, assists: 4, nationality: "Egypt" },
-  { name: "Luca Romano", club: "United FC", pos: "CM", age: 28, mp: 10, goals: 5, assists: 2, nationality: "Italy" },
-  { name: "Kenji Tanaka", club: "Blue Eagles", pos: "RW", age: 21, mp: 10, goals: 4, assists: 6, nationality: "Japan" },
-  { name: "David Chen", club: "Golden Stars", pos: "CB", age: 27, mp: 10, goals: 1, assists: 0, nationality: "China" },
-  { name: "Omar Faruk", club: "Dynamo City", pos: "GK", age: 30, mp: 10, goals: 0, assists: 0, nationality: "Turkey" },
-  { name: "Chris Park", club: "Metro FC", pos: "LB", age: 25, mp: 8, goals: 1, assists: 3, nationality: "Korea" },
-];
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function PlayersPage() {
+  const navigate = useNavigate();
+  const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const limit = 10;
+
+  // Filters State
+  const [search, setSearch] = useState("");
+  const [selectedClubs, setSelectedClubs] = useState<string[]>([]);
+  const [selectedAges, setSelectedAges] = useState<AgeCategory[]>([]);
+  const [selectedPositions, setSelectedPositions] = useState<Position[]>([]);
+  const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
+  
+  // Sorting State
+  const [sortBy, setSortBy] = useState("name");
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+
+  const fetchPlayers = useCallback(async () => {
+    setLoading(true);
+    try {
+      const result = await playerService.getPlayers(page, limit, {
+        search,
+        clubId: selectedClubs,
+        ageCategory: selectedAges,
+        position: selectedPositions,
+        sortBy,
+        sortOrder,
+      });
+      setPlayers(result.items);
+      setTotal(result.total);
+      setTotalPages(result.totalPages);
+    } catch (error) {
+      toast.error("Failed to fetch players");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, search, selectedClubs, selectedAges, selectedPositions, sortBy, sortOrder]);
+
+  useEffect(() => {
+    fetchPlayers();
+  }, [fetchPlayers]);
+
+  const handleClearAll = () => {
+    setSearch("");
+    setSelectedClubs([]);
+    setSelectedAges([]);
+    setSelectedPositions([]);
+    setPage(1);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm("Are you sure you want to delete this player?")) {
+      try {
+        await playerService.deletePlayer(id);
+        toast.success("Player deleted successfully");
+        fetchPlayers();
+      } catch (error) {
+        toast.error("Failed to delete player");
+      }
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (window.confirm(`Are you sure you want to delete ${selectedPlayers.length} players?`)) {
+      try {
+        await playerService.bulkDelete(selectedPlayers);
+        toast.success(`${selectedPlayers.length} players deleted`);
+        setSelectedPlayers([]);
+        fetchPlayers();
+      } catch (error) {
+        toast.error("Failed to perform bulk delete");
+      }
+    }
+  };
+
+  const handleExport = (type: 'csv' | 'pdf') => {
+    if (type === 'csv') {
+      const headers = ["ID", "Name", "Club", "Age Category", "Position", "Nationality", "Status", "Matches", "Goals", "Assists", "Rating"];
+      const csvContent = [
+        headers.join(","),
+        ...players.map(p => [
+          p.id,
+          p.name,
+          p.clubName,
+          p.ageCategory,
+          p.primaryPosition,
+          p.nationality,
+          p.status,
+          p.stats.matchesPlayed,
+          p.stats.goals,
+          p.stats.assists,
+          p.stats.averageRating.toFixed(2)
+        ].join(","))
+      ].join("\n");
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `players_export_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success("CSV export successful");
+    } else {
+      toast.info("PDF Exporting...", {
+        description: "PDF report generation is being prepared with high-fidelity formatting."
+      });
+      // In a real app, use jspdf or a server-side generator
+    }
+  };
+
+  const handleSort = (field: string) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(field);
+      setSortOrder('asc');
+    }
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold">Players</h1>
-          <p className="text-muted-foreground">Player database · {players.length} players</p>
+    <div className="space-y-8 max-w-[1600px] mx-auto pb-20 animate-in fade-in duration-500">
+      {/* Page Header */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2 text-xs font-black text-muted-foreground uppercase tracking-widest">
+            <Link to="/" className="hover:text-secondary transition-colors">Dashboard</Link>
+            <ChevronRight className="h-3 w-3" />
+            <span className="text-foreground">Player Database</span>
+          </div>
+          <h1 className="text-4xl font-black tracking-tighter">Athletes & Rosters</h1>
+          <p className="text-muted-foreground font-medium">Manage your league's talent, track performance, and verify eligibility.</p>
         </div>
-        <Button variant="success" size="sm">+ Add Player</Button>
+
+        <div className="flex items-center gap-3">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="h-11 px-5 rounded-2xl font-bold gap-2 hover:bg-muted/50 transition-all">
+                <Download className="h-4 w-4 text-secondary" /> EXPORT
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-[180px] rounded-2xl p-2">
+              <DropdownMenuItem onClick={() => handleExport('csv')} className="gap-2 rounded-xl font-bold text-sm px-3 py-2.5">
+                <FileText className="h-4 w-4" /> Export as CSV
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleExport('pdf')} className="gap-2 rounded-xl font-bold text-sm px-3 py-2.5">
+                <FileText className="h-4 w-4" /> Export as PDF
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          
+          <Link to="/players/register">
+            <Button className="h-11 px-6 bg-secondary hover:bg-secondary/90 text-white font-black rounded-2xl gap-2 shadow-lg shadow-secondary/20 transition-all hover:scale-105 active:scale-95">
+              <Plus className="h-5 w-5" /> REGISTER PLAYER
+            </Button>
+          </Link>
+        </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Search players..."
-            className="h-10 w-full rounded-lg border bg-card pl-10 pr-4 text-sm outline-none focus:border-secondary focus:ring-1 focus:ring-secondary"
-          />
-        </div>
-        {["All Clubs", "All Positions", "All Ages"].map((f) => (
-          <button key={f} className="h-10 px-4 rounded-lg border bg-card text-sm text-muted-foreground hover:bg-muted transition-colors flex items-center gap-2">
-            <Filter className="h-3.5 w-3.5" />{f}
-          </button>
+      {/* Stats Quick Overview */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          { label: "Total Registered", value: total, color: "text-foreground" },
+          { label: "Active Now", value: Math.floor(total * 0.9), color: "text-success" },
+          { label: "Pending Verification", value: 12, color: "text-warning" },
+          { label: "Season Newcomers", value: 45, color: "text-secondary" },
+        ].map((s, i) => (
+          <div key={i} className="bg-card rounded-2xl border p-5 shadow-sm">
+            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">{s.label}</p>
+            <p className={cn("text-2xl font-black leading-none", s.color)}>{s.value}</p>
+          </div>
         ))}
       </div>
 
-      {/* Table */}
-      <div className="bg-card rounded-lg border overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b bg-muted/50">
-                <th className="data-table-header px-4 py-3 text-left">Player</th>
-                <th className="data-table-header px-4 py-3 text-left">Club</th>
-                <th className="data-table-header px-4 py-3 text-center">Pos</th>
-                <th className="data-table-header px-4 py-3 text-center hidden sm:table-cell">Age</th>
-                <th className="data-table-header px-4 py-3 text-center hidden md:table-cell">MP</th>
-                <th className="data-table-header px-4 py-3 text-center">Goals</th>
-                <th className="data-table-header px-4 py-3 text-center hidden sm:table-cell">Assists</th>
-              </tr>
-            </thead>
-            <tbody>
-              {players.map((p, i) => (
-                <tr key={i} className="border-b last:border-0 hover:bg-muted/30 transition-colors cursor-pointer">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center text-xs font-bold shrink-0">
-                        {p.name.split(" ").map(n => n[0]).join("")}
-                      </div>
-                      <div>
-                        <p className="font-medium text-sm">{p.name}</p>
-                        <p className="text-xs text-muted-foreground">{p.nationality}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground">{p.club}</td>
-                  <td className="px-4 py-3 text-center"><span className="text-xs font-medium bg-muted px-2 py-0.5 rounded">{p.pos}</span></td>
-                  <td className="px-4 py-3 text-sm text-center hidden sm:table-cell">{p.age}</td>
-                  <td className="px-4 py-3 text-sm text-center hidden md:table-cell">{p.mp}</td>
-                  <td className="px-4 py-3 text-center text-sm font-bold text-secondary">{p.goals}</td>
-                  <td className="px-4 py-3 text-sm text-center hidden sm:table-cell">{p.assists}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        {/* Pagination */}
-        <div className="flex items-center justify-between px-4 py-3 border-t bg-muted/30">
-          <span className="text-xs text-muted-foreground">Showing 1-8 of 52 players</span>
-          <div className="flex gap-1">
-            {[1, 2, 3, "...", 7].map((p, i) => (
-              <button key={i} className={`h-8 w-8 rounded text-xs font-medium transition-colors ${p === 1 ? "bg-secondary text-secondary-foreground" : "hover:bg-muted"}`}>
-                {p}
-              </button>
-            ))}
+      {/* Filters Section */}
+      <div className="bg-card rounded-3xl border p-6 shadow-sm space-y-6">
+        <div className="flex items-center justify-between border-b pb-4 border-muted">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-secondary/10 flex items-center justify-center">
+              <RefreshCw className={cn("h-5 w-5 text-secondary transition-all", loading && "animate-spin")} />
+            </div>
+            <h2 className="text-xl font-black tracking-tight">Database Filters</h2>
+          </div>
+          
+          <div className="flex items-center bg-muted/50 p-1 rounded-xl border">
+            <Button 
+              variant={viewMode === 'table' ? 'secondary' : 'ghost'} 
+              size="sm" 
+              onClick={() => setViewMode('table')}
+              className={cn("h-8 px-3 rounded-lg gap-2 font-bold text-xs", viewMode === 'table' && "shadow-sm")}
+            >
+              <List className="h-3.5 w-3.5" /> TABLE
+            </Button>
+            <Button 
+              variant={viewMode === 'grid' ? 'secondary' : 'ghost'} 
+              size="sm" 
+              onClick={() => setViewMode('grid')}
+              className={cn("h-8 px-3 rounded-lg gap-2 font-bold text-xs", viewMode === 'grid' && "shadow-sm")}
+            >
+              <LayoutGrid className="h-3.5 w-3.5" /> CARDS
+            </Button>
           </div>
         </div>
+
+        <PlayerFilters 
+          search={search}
+          onSearchChange={(v) => { setSearch(v); setPage(1); }}
+          selectedClubs={selectedClubs}
+          onClubsChange={(v) => { setSelectedClubs(v); setPage(1); }}
+          selectedAges={selectedAges}
+          onAgesChange={(v) => { setSelectedAges(v); setPage(1); }}
+          selectedPositions={selectedPositions}
+          onPositionsChange={(v) => { setSelectedPositions(v); setPage(1); }}
+          onClearAll={handleClearAll}
+        />
       </div>
 
-      {/* Player ID Card Preview */}
-      <div>
-        <h2 className="text-lg font-semibold mb-3">Digital Player Card</h2>
-        <div className="w-full max-w-xs">
-          <div className="bg-gradient-primary rounded-xl overflow-hidden">
-            <div className="p-5 text-primary-foreground">
-              <div className="flex items-start gap-4">
-                <div className="h-16 w-16 rounded-lg bg-primary-foreground/10 flex items-center justify-center text-2xl font-bold">CS</div>
-                <div className="flex-1">
-                  <p className="font-bold">Carlos Silva</p>
-                  <p className="text-sm opacity-70">FC Thunder</p>
-                  <p className="text-xs opacity-50 mt-1">Striker · #9</p>
-                </div>
-              </div>
-              <div className="mt-4 pt-3 border-t border-primary-foreground/10 flex items-center justify-between">
-                <div>
-                  <p className="text-xs opacity-50">Player ID</p>
-                  <p className="text-sm font-mono font-bold">KO-2026-0042</p>
-                </div>
-                <div className="h-14 w-14 bg-primary-foreground/10 rounded-lg flex items-center justify-center text-xs text-primary-foreground/50">QR</div>
-              </div>
-              <p className="text-[10px] opacity-40 mt-2 text-center">Premier Cup 2026</p>
-            </div>
+      {/* Main Content: Table or Grid */}
+      <div className="relative min-h-[400px]">
+        {loading ? (
+          <div className="space-y-4">
+            <Skeleton className="h-[60px] w-full rounded-2xl" />
+            <Skeleton className="h-[400px] w-full rounded-3xl" />
           </div>
-        </div>
+        ) : players.length > 0 ? (
+          viewMode === 'table' ? (
+            <PlayerTable 
+              players={players}
+              total={total}
+              page={page}
+              totalPages={totalPages}
+              limit={limit}
+              onPageChange={setPage}
+              selectedPlayers={selectedPlayers}
+              onSelectionChange={setSelectedPlayers}
+              onDelete={handleDelete}
+              onBulkDelete={handleBulkDelete}
+              onViewProfile={(id) => navigate(`/players/${id}`)}
+              sortBy={sortBy}
+              sortOrder={sortOrder}
+              onSort={handleSort}
+            />
+          ) : (
+            <div className="space-y-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {players.map((player) => (
+                  <div key={player.id} className="flex justify-center">
+                    <DigitalPlayerCard player={player} />
+                  </div>
+                ))}
+              </div>
+              
+              {/* Grid Pagination */}
+              <div className="flex items-center justify-center pt-8 border-t border-muted">
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    disabled={page === 1}
+                    onClick={() => setPage(page - 1)}
+                    className="h-10 rounded-xl font-bold gap-1"
+                  >
+                    <ChevronLeft className="h-4 w-4" /> Previous
+                  </Button>
+                  <span className="text-sm font-black mx-4">PAGE {page} OF {totalPages}</span>
+                  <Button
+                    variant="outline"
+                    disabled={page === totalPages}
+                    onClick={() => setPage(page + 1)}
+                    className="h-10 rounded-xl font-bold gap-1"
+                  >
+                    Next <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )
+        ) : (
+          <div className="flex flex-col items-center justify-center py-20 bg-card rounded-3xl border border-dashed border-muted-foreground/30 text-center animate-in zoom-in-95 duration-500">
+            <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center mb-6">
+              <RefreshCw className="h-10 w-10 text-muted-foreground/40" />
+            </div>
+            <h3 className="text-2xl font-black tracking-tight">No players found</h3>
+            <p className="text-muted-foreground max-w-sm mt-2 font-medium">We couldn't find any players matching your current filters. Try adjusting your search or resetting filters.</p>
+            <Button 
+              variant="outline" 
+              onClick={handleClearAll}
+              className="mt-8 h-11 px-8 rounded-2xl font-black text-xs uppercase tracking-widest"
+            >
+              Reset All Filters
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

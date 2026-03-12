@@ -1,189 +1,255 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { ArrowLeft, MapPin, Trophy, Calendar, Download } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { 
+  ArrowLeft, 
+  Edit2, 
+  Share2, 
+  MoreVertical, 
+  Shield, 
+  User, 
+  BarChart3, 
+  FileText, 
+  Swords, 
+  Activity,
+  ChevronRight,
+  Download,
+  Trash2,
+  Mail,
+  Phone
+} from "lucide-react";
+import { playerService } from "@/modules/players/services/playerService";
+import { Player } from "@/modules/players/types/player";
+import { ProfileInfoTab } from "@/modules/players/components/ProfileInfoTab";
+import { ProfileStatsTab } from "@/modules/players/components/ProfileStatsTab";
+import { ProfileDocsTab } from "@/modules/players/components/ProfileDocsTab";
+import { ProfileMatchesTab } from "@/modules/players/components/ProfileMatchesTab";
+import { ProfileTrainingTab } from "@/modules/players/components/ProfileTrainingTab";
 import { Button } from "@/components/ui/button";
-import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+} from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 
-const radarData = [
-  { stat: "Pace", value: 85 }, { stat: "Shooting", value: 90 }, { stat: "Passing", value: 72 },
-  { stat: "Dribbling", value: 78 }, { stat: "Defense", value: 35 }, { stat: "Physical", value: 80 },
+const tabs = [
+  { id: "info", label: "Player Info", icon: User },
+  { id: "stats", label: "Statistics", icon: BarChart3 },
+  { id: "docs", label: "Documents", icon: FileText },
+  { id: "matches", label: "Match History", icon: Swords },
+  { id: "training", label: "Training Records", icon: Activity },
 ];
-
-const goalsPerMatch = [
-  { match: "R1", goals: 1 }, { match: "R2", goals: 2 }, { match: "R3", goals: 0 },
-  { match: "R4", goals: 1 }, { match: "R5", goals: 2 }, { match: "R6", goals: 0 },
-  { match: "R7", goals: 1 }, { match: "R8", goals: 0 }, { match: "R9", goals: 0 },
-  { match: "R10", goals: 1 },
-];
-
-const tabs = ["Profile", "Statistics", "Match History", "Documents"];
 
 export default function PlayerProfilePage() {
-  const [activeTab, setActiveTab] = useState("Profile");
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [player, setPlayer] = useState<Player | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("info");
+
+  useEffect(() => {
+    const fetchPlayer = async () => {
+      if (!id) return;
+      setLoading(true);
+      try {
+        const data = await playerService.getPlayerById(id);
+        if (data) {
+          setPlayer(data);
+        } else {
+          toast.error("Player not found");
+          navigate("/players");
+        }
+      } catch (error) {
+        toast.error("Failed to load player profile");
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPlayer();
+  }, [id, navigate]);
+
+  if (loading) {
+    return (
+      <div className="space-y-8 animate-in fade-in duration-500">
+        <Skeleton className="h-10 w-40 rounded-xl" />
+        <Skeleton className="h-[200px] w-full rounded-3xl" />
+        <div className="flex gap-2">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="h-12 w-32 rounded-xl" />
+          ))}
+        </div>
+        <Skeleton className="h-[600px] w-full rounded-3xl" />
+      </div>
+    );
+  }
+
+  if (!player) return null;
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "info": return <ProfileInfoTab player={player} />;
+      case "stats": return <ProfileStatsTab player={player} />;
+      case "docs": return <ProfileDocsTab player={player} />;
+      case "matches": return <ProfileMatchesTab player={player} />;
+      case "training": return <ProfileTrainingTab player={player} />;
+      default: return null;
+    }
+  };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3 mb-2">
-        <Link to="/players" className="text-muted-foreground hover:text-foreground"><ArrowLeft className="h-5 w-5" /></Link>
-        <span className="text-sm text-muted-foreground">Players</span>
-      </div>
-
-      {/* Player Header */}
-      <div className="bg-gradient-primary rounded-xl p-6 text-primary-foreground">
-        <div className="flex flex-col md:flex-row md:items-center gap-6">
-          <div className="h-24 w-24 rounded-xl bg-primary-foreground/10 flex items-center justify-center text-4xl font-black">CS</div>
-          <div className="flex-1">
-            <div className="flex items-center gap-3 mb-1">
-              <h1 className="text-3xl font-bold">Carlos Silva</h1>
-              <span className="bg-secondary/20 text-secondary-foreground text-xs font-bold px-2 py-0.5 rounded">#9</span>
-            </div>
-            <div className="flex flex-wrap items-center gap-4 text-sm opacity-80">
-              <span>Striker</span>
-              <span className="flex items-center gap-1"><Trophy className="h-4 w-4" />FC Thunder</span>
-              <span className="flex items-center gap-1"><MapPin className="h-4 w-4" />Brazil</span>
-              <span className="flex items-center gap-1"><Calendar className="h-4 w-4" />Age 24</span>
+    <div className="space-y-8 max-w-[1600px] mx-auto pb-20 animate-in fade-in duration-500">
+      {/* Header & Actions */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Link to="/players">
+            <Button variant="ghost" size="icon" className="rounded-full hover:bg-muted transition-colors">
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+          </Link>
+          <div className="space-y-0.5">
+            <h1 className="text-3xl font-black tracking-tight">Player Profile</h1>
+            <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-widest">
+              <Link to="/players" className="hover:text-secondary transition-colors">Players</Link>
+              <ChevronRight className="h-3 w-3" />
+              <span className="text-foreground">{player.name}</span>
             </div>
           </div>
-          <Button variant="accent" size="sm"><Download className="h-4 w-4 mr-1" />Player Card</Button>
+        </div>
+        <div className="flex items-center gap-3">
+          <Button variant="outline" className="h-11 px-5 rounded-2xl font-bold gap-2 hover:bg-muted/50 transition-all">
+            <Share2 className="h-4 w-4 text-secondary" /> SHARE
+          </Button>
+          <Button className="h-11 px-6 bg-secondary hover:bg-secondary/90 text-white font-black rounded-2xl gap-2 shadow-lg shadow-secondary/20 transition-all hover:scale-105 active:scale-95">
+            <Edit2 className="h-4 w-4" /> EDIT PROFILE
+          </Button>
         </div>
       </div>
 
-      <div className="flex gap-1 overflow-x-auto border-b">
+      {/* Profile Summary Card */}
+      <div className="relative group">
+        <div className="absolute inset-0 bg-gradient-to-r from-secondary to-secondary/60 rounded-[2.5rem] blur-xl opacity-10 group-hover:opacity-20 transition-opacity" />
+        <div className="relative bg-card rounded-[2.5rem] border p-8 shadow-sm overflow-hidden border-muted">
+          <div className="absolute top-0 right-0 p-8 opacity-5">
+            <Shield className="h-64 w-64 -rotate-12" />
+          </div>
+          
+          <div className="flex flex-col lg:flex-row gap-10 items-start lg:items-center relative z-10">
+            {/* Avatar Section */}
+            <div className="relative group/avatar">
+              <div className="absolute inset-0 bg-secondary blur-2xl opacity-20 animate-pulse" />
+              <Avatar className="h-40 w-40 rounded-[2.5rem] border-4 border-muted group-hover/avatar:border-secondary/30 transition-all duration-500 relative z-10">
+                <AvatarImage src={player.photoUrl} alt={player.name} className="object-cover" />
+                <AvatarFallback className="bg-secondary/10 text-secondary font-black text-4xl">
+                  {player.name.split(' ').map(n => n[0]).join('')}
+                </AvatarFallback>
+              </Avatar>
+              <div className="absolute -bottom-3 -right-3 bg-secondary text-white text-[10px] font-black px-4 py-2 rounded-2xl shadow-xl border-4 border-background relative z-20">
+                #{player.id.split('-').pop()}
+              </div>
+            </div>
+            
+            {/* Name and Quick Details */}
+            <div className="flex-1 space-y-6">
+              <div>
+                <div className="flex items-center gap-4 mb-2">
+                  <h2 className="text-5xl font-black tracking-tighter">{player.name}</h2>
+                  <Badge variant={player.status === 'active' ? 'success' : 'secondary'} className="h-7 px-4 font-black uppercase tracking-widest rounded-full">
+                    {player.status.toUpperCase()}
+                  </Badge>
+                </div>
+                <div className="flex flex-wrap items-center gap-6 text-muted-foreground font-bold">
+                  <div className="flex items-center gap-2">
+                    <Shield className="h-4 w-4 text-secondary" /> {player.clubName}
+                  </div>
+                  <div className="h-1 w-1 rounded-full bg-muted-foreground/30" />
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-secondary" /> {player.primaryPosition}
+                  </div>
+                  <div className="h-1 w-1 rounded-full bg-muted-foreground/30" />
+                  <div className="flex items-center gap-2">
+                    <Activity className="h-4 w-4 text-secondary" /> {player.ageCategory}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex flex-wrap items-center gap-4">
+                <Button variant="outline" className="h-10 px-5 rounded-xl font-bold gap-2 bg-muted/30 border-muted hover:bg-muted/50 transition-all">
+                  <Mail className="h-4 w-4 text-muted-foreground" /> {player.email}
+                </Button>
+                <Button variant="outline" className="h-10 px-5 rounded-xl font-bold gap-2 bg-muted/30 border-muted hover:bg-muted/50 transition-all">
+                  <Phone className="h-4 w-4 text-muted-foreground" /> {player.phone}
+                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl bg-muted/30 border-muted hover:bg-muted/50">
+                      <MoreVertical className="h-5 w-5 text-muted-foreground" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-[220px] rounded-2xl p-2 shadow-xl border-muted">
+                    <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-3 py-2">Quick Actions</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="gap-2 rounded-xl font-bold text-sm px-3 py-2.5">
+                      <Download className="h-4 w-4 text-secondary" /> Download Player Card
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="gap-2 rounded-xl font-bold text-sm px-3 py-2.5">
+                      <Share2 className="h-4 w-4 text-secondary" /> Share Profile
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="gap-2 rounded-xl font-bold text-sm px-3 py-2.5 text-destructive focus:text-destructive focus:bg-destructive/5">
+                      <Trash2 className="h-4 w-4" /> Deactivate Player
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+
+            {/* Performance Snapshot */}
+            <div className="grid grid-cols-2 gap-4 w-full lg:w-[320px]">
+              <div className="p-5 rounded-[2rem] bg-muted/30 border border-muted/50 text-center flex flex-col items-center justify-center transition-all hover:bg-muted/50 group/stat">
+                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1 group-hover/stat:text-secondary transition-colors">Avg. Rating</p>
+                <p className="text-3xl font-black">{player.stats.averageRating.toFixed(1)}</p>
+              </div>
+              <div className="p-5 rounded-[2rem] bg-secondary/10 border border-secondary/20 text-center flex flex-col items-center justify-center transition-all hover:bg-secondary/20 group/stat">
+                <p className="text-[10px] font-black text-secondary uppercase tracking-widest mb-1 group-hover/stat:text-secondary/80 transition-colors">Matches</p>
+                <p className="text-3xl font-black text-secondary">{player.stats.matchesPlayed}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Navigation Tabs */}
+      <div className="flex flex-wrap items-center gap-2 p-1.5 bg-muted/50 rounded-2xl border w-fit shadow-sm">
         {tabs.map((tab) => (
-          <button key={tab} onClick={() => setActiveTab(tab)} className={`px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors border-b-2 ${activeTab === tab ? "border-secondary text-secondary" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
-            {tab}
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={cn(
+              "flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-black transition-all",
+              activeTab === tab.id 
+                ? "bg-background text-secondary shadow-md ring-1 ring-black/5" 
+                : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+            )}
+          >
+            <tab.icon className={cn("h-4 w-4", activeTab === tab.id ? "text-secondary" : "text-muted-foreground")} />
+            {tab.label.toUpperCase()}
           </button>
         ))}
       </div>
 
-      {activeTab === "Profile" && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Info */}
-          <div className="bg-card rounded-lg border p-5 space-y-4">
-            <h3 className="font-semibold">Personal Info</h3>
-            {[
-              ["Full Name", "Carlos Eduardo Silva"],
-              ["Date of Birth", "May 15, 2002"],
-              ["Nationality", "Brazilian"],
-              ["Height", "182 cm"],
-              ["Weight", "76 kg"],
-              ["Preferred Foot", "Right"],
-              ["Player ID", "KO-2026-0042"],
-            ].map(([label, value]) => (
-              <div key={label} className="flex justify-between items-center py-1">
-                <span className="text-sm text-muted-foreground">{label}</span>
-                <span className="text-sm font-medium">{value}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* Season Stats */}
-          <div className="bg-card rounded-lg border p-5">
-            <h3 className="font-semibold mb-4">Season Statistics</h3>
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                { label: "Appearances", value: 10 }, { label: "Goals", value: 8 },
-                { label: "Assists", value: 3 }, { label: "Minutes", value: 870 },
-                { label: "Yellow Cards", value: 1 }, { label: "Red Cards", value: 0 },
-                { label: "Pass Accuracy", value: "78%" }, { label: "Shot Accuracy", value: "64%" },
-              ].map((s) => (
-                <div key={s.label} className="text-center py-2">
-                  <p className="text-xl font-bold">{s.value}</p>
-                  <p className="text-xs text-muted-foreground">{s.label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Radar */}
-          <div className="bg-card rounded-lg border p-5">
-            <h3 className="font-semibold mb-4">Attributes</h3>
-            <ResponsiveContainer width="100%" height={220}>
-              <RadarChart data={radarData} cx="50%" cy="50%" outerRadius="70%">
-                <PolarGrid stroke="hsl(var(--border))" />
-                <PolarAngleAxis dataKey="stat" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
-                <Radar dataKey="value" stroke="hsl(var(--secondary))" fill="hsl(var(--secondary))" fillOpacity={0.2} strokeWidth={2} />
-              </RadarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      )}
-
-      {activeTab === "Statistics" && (
-        <div className="space-y-6">
-          <div className="bg-card rounded-lg border p-5">
-            <h3 className="font-semibold mb-4">Goals per Match</h3>
-            <ResponsiveContainer width="100%" height={240}>
-              <BarChart data={goalsPerMatch}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="match" tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
-                <YAxis tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
-                <Tooltip />
-                <Bar dataKey="goals" fill="hsl(var(--secondary))" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      )}
-
-      {activeTab === "Match History" && (
-        <div className="bg-card rounded-lg border overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b bg-muted/50">
-                <th className="data-table-header px-4 py-3 text-left">Match</th>
-                <th className="data-table-header px-4 py-3 text-center hidden sm:table-cell">Result</th>
-                <th className="data-table-header px-4 py-3 text-center">Goals</th>
-                <th className="data-table-header px-4 py-3 text-center hidden md:table-cell">Assists</th>
-                <th className="data-table-header px-4 py-3 text-center hidden md:table-cell">Minutes</th>
-                <th className="data-table-header px-4 py-3 text-center hidden sm:table-cell">Rating</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                { match: "vs Red Lions", result: "2-1 W", goals: 2, assists: 0, mins: 90, rating: 8.5 },
-                { match: "vs Blue Eagles", result: "3-1 W", goals: 1, assists: 1, mins: 90, rating: 7.8 },
-                { match: "vs Golden Stars", result: "1-0 W", goals: 1, assists: 0, mins: 85, rating: 7.2 },
-                { match: "vs Dynamo City", result: "2-2 D", goals: 1, assists: 0, mins: 90, rating: 6.9 },
-                { match: "vs Metro FC", result: "4-0 W", goals: 2, assists: 1, mins: 70, rating: 9.0 },
-              ].map((m, i) => (
-                <tr key={i} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
-                  <td className="px-4 py-3 text-sm font-medium">{m.match}</td>
-                  <td className="px-4 py-3 text-sm text-center hidden sm:table-cell">{m.result}</td>
-                  <td className="px-4 py-3 text-center text-sm font-bold text-secondary">{m.goals}</td>
-                  <td className="px-4 py-3 text-sm text-center hidden md:table-cell">{m.assists}</td>
-                  <td className="px-4 py-3 text-sm text-center hidden md:table-cell">{m.mins}'</td>
-                  <td className="px-4 py-3 text-center hidden sm:table-cell">
-                    <span className={`text-sm font-bold ${m.rating >= 8 ? "text-secondary" : m.rating >= 7 ? "text-accent" : "text-muted-foreground"}`}>{m.rating}</span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {activeTab === "Documents" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {[
-            { name: "Player Registration Form", type: "PDF", date: "Feb 28, 2026" },
-            { name: "Medical Certificate", type: "PDF", date: "Feb 25, 2026" },
-            { name: "ID Document", type: "JPG", date: "Feb 20, 2026" },
-            { name: "Insurance Policy", type: "PDF", date: "Jan 15, 2026" },
-          ].map((doc, i) => (
-            <div key={i} className="bg-card rounded-lg border p-4 flex items-center justify-between hover:shadow-md transition-shadow cursor-pointer">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-destructive/10 flex items-center justify-center text-xs font-bold text-destructive">{doc.type}</div>
-                <div>
-                  <p className="text-sm font-medium">{doc.name}</p>
-                  <p className="text-xs text-muted-foreground">{doc.date}</p>
-                </div>
-              </div>
-              <Download className="h-4 w-4 text-muted-foreground" />
-            </div>
-          ))}
-        </div>
-      )}
+      {/* Tab Content Rendering */}
+      <div className="min-h-[600px]">
+        {renderTabContent()}
+      </div>
     </div>
   );
 }

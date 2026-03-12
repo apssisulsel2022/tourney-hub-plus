@@ -29,7 +29,9 @@ const redCards = [
   { name: "Dan Kim", team: "FC Thunder", cards: 1 },
 ];
 
-function StatList({ title, data, valueKey, valueLabel, barColor }: { title: string; data: { name: string; team: string; [key: string]: any }[]; valueKey: string; valueLabel: string; barColor: string }) {
+type StatRow<K extends string> = { name: string; team: string } & Record<K, number>;
+
+function StatList<K extends string>({ title, data, valueKey, valueLabel, barColor }: { title: string; data: StatRow<K>[]; valueKey: K; valueLabel: string; barColor: string }) {
   const max = Math.max(...data.map(d => d[valueKey]));
   return (
     <div className="bg-card rounded-lg border overflow-hidden">

@@ -111,12 +111,14 @@ export default function TournamentsPage() {
           <div className="h-9 p-1 bg-muted rounded-lg flex items-center gap-1 ml-2">
             <button 
               onClick={() => setViewMode("grid")}
+              aria-label="Grid view"
               className={cn("px-2 py-1 rounded-md transition-all", viewMode === "grid" ? "bg-background shadow-sm text-secondary" : "text-muted-foreground")}
             >
               <Trophy className="h-4 w-4" />
             </button>
             <button 
               onClick={() => setViewMode("list")}
+              aria-label="List view"
               className={cn("px-2 py-1 rounded-md transition-all", viewMode === "list" ? "bg-background shadow-sm text-secondary" : "text-muted-foreground")}
             >
               <Users className="h-4 w-4" />

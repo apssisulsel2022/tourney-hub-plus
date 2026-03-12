@@ -58,7 +58,7 @@ export function TeamForm({ onSubmit, onCancel, initialData }: TeamFormProps) {
                 {step.title}
               </span>
             </div>
-            {i < STEPS.size - 1 && <div className="w-12 h-px bg-muted" />}
+            {i < STEPS.length - 1 && <div className="w-12 h-px bg-muted" />}
           </React.Fragment>
         ))}
       </div>

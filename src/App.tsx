@@ -22,6 +22,7 @@ import PlayerProfilePage from "@/pages/players/PlayerProfilePage";
 import PlayerRegistrationPage from "@/pages/players/PlayerRegistrationPage";
 import MatchesPage from "@/pages/MatchesPage";
 import MatchCenterPage from "@/pages/MatchCenterPage";
+import MatchDetailPage from "@/pages/matches/MatchDetailPage";
 import MatchReportPage from "@/pages/matches/MatchReportPage";
 import VenuesPage from "@/pages/VenuesPage";
 import VenueDetailPage from "@/pages/venues/VenueDetailPage";
@@ -118,12 +119,14 @@ const App = () => (
 
           {/* Players */}
           <Route path="/players" element={<DL><PlayersPage /></DL>} />
-          <Route path="/players/profile" element={<DL><PlayerProfilePage /></DL>} />
+          <Route path="/players/:id" element={<DL><PlayerProfilePage /></DL>} />
           <Route path="/players/register" element={<DL><PlayerRegistrationPage /></DL>} />
 
           {/* Matches */}
           <Route path="/matches" element={<DL><MatchesPage /></DL>} />
+          <Route path="/matches/:id" element={<DL><MatchDetailPage /></DL>} />
           <Route path="/matches/center" element={<DL><MatchCenterPage /></DL>} />
+          <Route path="/matches/:id/center" element={<DL><MatchCenterPage /></DL>} />
           <Route path="/matches/report" element={<DL><MatchReportPage /></DL>} />
 
           {/* Venues */}

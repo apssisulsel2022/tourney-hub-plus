@@ -129,7 +129,7 @@ export function MatchesTab() {
       ) : (
         <div className="bg-card rounded-2xl border p-8 shadow-sm overflow-x-auto">
           <div className="min-w-[800px]">
-            <TournamentBracket />
+            <TournamentBracket quarterfinals={[]} semifinals={[]} final={[]} />
           </div>
         </div>
       )}
