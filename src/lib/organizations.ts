@@ -1,3 +1,11 @@
+/**
+ * Organizations domain model + mock service layer.
+ *
+ * Current behavior:
+ * - In-memory storage (demo dataset)
+ * - Artificial latency via setTimeout
+ * - ID uniqueness assertions to prevent accidental collisions in UI joins
+ */
 export type OrganizationStatus = "active" | "inactive";
 export type MemberStatus = "active" | "invited" | "suspended";
 
@@ -208,6 +216,11 @@ for (const org of organizationsStorage) {
   assertUniqueIds(org.tournaments);
 }
 
+/**
+ * Public API used by pages:
+ * - list() for OrganizationsPage
+ * - getById() for OrganizationDetailPage (route param :id)
+ */
 export const organizationsService = {
   list: async () => {
     await new Promise((r) => setTimeout(r, 200));

@@ -1,3 +1,14 @@
+/**
+ * Matches domain model + mock service layer.
+ *
+ * Used by:
+ * - Admin pages: Matches list/detail/match center
+ * - Public pages: schedule/results/match detail
+ *
+ * Notes:
+ * - This is an in-memory demo service (not a real backend).
+ * - For production, migrate to a REST/SSE/WebSocket API and replace this service.
+ */
 export type MatchStatus = "live" | "upcoming" | "completed" | "delayed";
 
 export type MatchEventType = "goal" | "yellow" | "red" | "substitution" | "var";

@@ -1,3 +1,15 @@
+/**
+ * Venues domain model + mock service layer.
+ *
+ * Responsibilities:
+ * - Listing/filter/sort/pagination helpers for venues
+ * - Booking model + conflict detection
+ * - Demo dataset seed and in-memory storage
+ *
+ * UI entry points:
+ * - VenuesPage, VenueProfilePage, VenueSchedulePage
+ * - VenueMap component
+ */
 export type VenueType = "stadium" | "arena" | "training_ground" | "indoor" | "community_field";
 
 export type BookingStatus = "available" | "pending" | "booked";
