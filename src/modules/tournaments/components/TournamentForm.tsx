@@ -131,6 +131,17 @@ export function TournamentForm({ onSubmit, onCancel, onSaveDraft, initialData }:
         </div>
 
         <div>
+          <label className="text-sm font-medium mb-1.5 block">Sport Type *</label>
+          <input
+            type="text"
+            placeholder="e.g. Football, Basketball"
+            {...register("sportType")}
+            className={`h-11 w-full rounded-lg border bg-background px-4 text-sm outline-none focus:border-secondary ${errors.sportType ? "border-destructive" : ""}`}
+          />
+          {errors.sportType && <p className="text-xs text-destructive mt-1">{errors.sportType.message}</p>}
+        </div>
+
+        <div>
           <label className="text-sm font-medium mb-1.5 block">Age Category *</label>
           <select
             {...register("ageCategory")}
@@ -142,6 +153,20 @@ export function TournamentForm({ onSubmit, onCancel, onSaveDraft, initialData }:
             <option value="U-17">U-17</option>
             <option value="U-15">U-15</option>
           </select>
+        </div>
+
+        <div>
+          <label className="text-sm font-medium mb-1.5 block">Registration Fee *</label>
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">Rp</span>
+            <input
+              type="number"
+              placeholder="0"
+              {...register("registrationFee", { valueAsNumber: true })}
+              className={`h-11 w-full rounded-lg border bg-background pl-9 pr-4 text-sm outline-none focus:border-secondary ${errors.registrationFee ? "border-destructive" : ""}`}
+            />
+          </div>
+          {errors.registrationFee && <p className="text-xs text-destructive mt-1">{errors.registrationFee.message}</p>}
         </div>
 
         <div>
@@ -205,6 +230,15 @@ export function TournamentForm({ onSubmit, onCancel, onSaveDraft, initialData }:
             type="date"
             {...register("registrationDeadline")}
             className="h-11 w-full rounded-lg border bg-background px-4 text-sm outline-none focus:border-secondary"
+          />
+        </div>
+
+        <div className="md:col-span-2">
+          <label className="text-sm font-medium mb-1.5 block">Tournament Rules</label>
+          <textarea
+            placeholder="Detailed rules for the tournament..."
+            {...register("rules")}
+            className="h-32 w-full rounded-lg border bg-background px-4 py-3 text-sm outline-none focus:border-secondary focus:ring-1 focus:ring-secondary resize-none"
           />
         </div>
       </div>

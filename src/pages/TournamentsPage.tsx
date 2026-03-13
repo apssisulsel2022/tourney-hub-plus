@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from "react";
-import { Trophy, Plus, Search, Filter, ArrowUpDown, Calendar, MapPin, Users, Swords, MoreVertical, Download, Printer } from "lucide-react";
+import React, { useState, useEffect, useMemo } from "react";
+import { Trophy, Plus, Search, Filter, ArrowUpDown, Calendar, MapPin, Users, Swords, MoreVertical, Download, Printer, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Link } from "react-router-dom";
@@ -14,35 +14,71 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-
-const tournamentsData = [
-  { id: "1", name: "Premier Cup 2026", teams: 14, maxTeams: 16, category: "U-21", dates: "Mar 1 – Apr 15", status: "active" as const, matches: 28, location: "New York", type: "Elimination" },
-  { id: "2", name: "City League Season 8", teams: 12, maxTeams: 12, category: "Senior", dates: "Feb 10 – Jun 30", status: "active" as const, matches: 66, location: "Los Angeles", type: "League" },
-  { id: "3", name: "Youth Championship", teams: 24, maxTeams: 32, category: "U-17", dates: "Apr 1 – May 20", status: "upcoming" as const, matches: 0, location: "Chicago", type: "Group + Knockout" },
-  { id: "4", name: "Summer Invitational", teams: 8, maxTeams: 16, category: "U-19", dates: "Jun 15 – Jul 10", status: "draft" as const, matches: 0, location: "Miami", type: "Knockout" },
-  { id: "5", name: "Winter Cup 2025", teams: 16, maxTeams: 16, category: "Senior", dates: "Nov 1 – Dec 20", status: "completed" as const, matches: 60, location: "Houston", type: "League" },
-];
+import { tournamentService } from "@/modules/tournaments/services/tournamentService";
+import { Tournament } from "@/modules/tournaments/types/tournament";
 
 export default function TournamentsPage() {
+  const [tournaments, setTournaments] = useState<Tournament[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("newest");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
+  useEffect(() => {
+    const fetchTournaments = async () => {
+      try {
+        const data = await tournamentService.getAll();
+        // Map from DB format to our internal Tournament type
+        const mappedData = data.map((t: any) => ({
+          id: t.id,
+          name: t.name,
+          description: t.description,
+          format: t.format,
+          ageCategory: t.age_category,
+          startDate: t.start_date,
+          endDate: t.end_date,
+          location: t.location,
+          maxTeams: t.max_teams,
+          registrationDeadline: t.registration_deadline,
+          logoUrl: t.logo_url,
+          organizationId: t.organization_id,
+          status: t.status,
+          registrationFee: t.registration_fee,
+          sportType: t.sport_type,
+        }));
+        setTournaments(mappedData);
+      } catch (error) {
+        console.error("Failed to fetch tournaments:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTournaments();
+  }, []);
+
   const filteredTournaments = useMemo(() => {
-    return tournamentsData
+    return tournaments
       .filter((t) => {
         const matchesSearch = t.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                            t.location.toLowerCase().includes(searchQuery.toLowerCase());
+                            (t.location && t.location.toLowerCase().includes(searchQuery.toLowerCase()));
         const matchesStatus = statusFilter === "all" || t.status === statusFilter;
         return matchesSearch && matchesStatus;
       })
       .sort((a, b) => {
         if (sortBy === "name") return a.name.localeCompare(b.name);
-        if (sortBy === "teams") return b.teams - a.teams;
-        return 0; // Default newest (mocked)
+        if (sortBy === "teams") return (b.maxTeams || 0) - (a.maxTeams || 0);
+        return 0;
       });
-  }, [searchQuery, statusFilter, sortBy]);
+  }, [tournaments, searchQuery, statusFilter, sortBy]);
+
+  if (loading) {
+    return (
+      <div className="h-[60vh] flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-secondary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 max-w-[1600px] mx-auto pb-10">
@@ -130,80 +166,76 @@ export default function TournamentsPage() {
       {/* Tournaments Grid/List */}
       {viewMode === "grid" ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredTournaments.map((t) => (
-            <div key={t.id} className="group relative bg-card rounded-2xl border border-muted hover:border-secondary/50 hover:shadow-xl hover:shadow-secondary/5 transition-all duration-300 overflow-hidden flex flex-col">
-              <Link to="/tournaments/detail" className="absolute inset-0 z-10" />
-              
-              {/* Card Header/Banner */}
-              <div className="h-32 bg-gradient-to-br from-secondary/20 via-background to-muted/30 relative flex items-center justify-center border-b border-muted/50 overflow-hidden">
-                <div className="absolute inset-0 bg-grid-white/5 [mask-image:linear-gradient(0deg,#fff,rgba(255,255,255,0.6))] -z-1" />
-                <Trophy className="h-12 w-12 text-secondary/20 group-hover:scale-110 group-hover:text-secondary/40 transition-all duration-500" />
-                <div className="absolute top-4 right-4 z-20">
-                  <StatusBadge status={t.status} />
+          {filteredTournaments.map((tournament) => (
+            <div key={tournament.id} className="group bg-card rounded-2xl border border-muted/60 overflow-hidden hover:border-secondary/40 hover:shadow-xl hover:shadow-secondary/5 transition-all duration-300">
+              <div className="relative h-48 bg-muted/30">
+                {tournament.logoUrl ? (
+                  <img src={tournament.logoUrl} alt={tournament.name} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Trophy className="h-12 w-12 text-muted/20" />
+                  </div>
+                )}
+                <div className="absolute top-4 right-4">
+                  <StatusBadge status={tournament.status} />
                 </div>
-                <div className="absolute top-4 left-4 z-20">
-                  <Badge variant="outline" className="bg-background/80 backdrop-blur-sm text-[10px] font-bold uppercase tracking-wider">
-                    {t.type}
+                <div className="absolute bottom-4 left-4">
+                  <Badge variant="secondary" className="bg-background/80 backdrop-blur-md text-foreground font-bold border-none">
+                    {tournament.format}
                   </Badge>
                 </div>
               </div>
 
-              {/* Card Content */}
-              <div className="p-5 flex-1 flex flex-col">
-                <div className="flex justify-between items-start gap-2 mb-1">
-                  <h3 className="font-bold text-lg leading-tight group-hover:text-secondary transition-colors line-clamp-1">{t.name}</h3>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button className="relative z-20 p-1 rounded-lg hover:bg-muted transition-colors text-muted-foreground">
-                        <MoreVertical className="h-4 w-4" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-[180px]">
-                      <DropdownMenuLabel>Quick Actions</DropdownMenuLabel>
-                      <DropdownMenuItem className="cursor-pointer gap-2"><Plus className="h-4 w-4" /> Manage Teams</DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer gap-2"><Calendar className="h-4 w-4" /> Edit Schedule</DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer gap-2"><Download className="h-4 w-4" /> Export Stats</DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem className="cursor-pointer text-destructive focus:text-destructive gap-2">Delete Tournament</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-                
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-4">
-                  <MapPin className="h-3 w-3" /> {t.location} · <Badge variant="secondary" className="h-4 text-[9px] px-1 font-bold">{t.category}</Badge>
+              <div className="p-5 space-y-4">
+                <div>
+                  <h3 className="text-xl font-bold truncate group-hover:text-secondary transition-colors">{tournament.name}</h3>
+                  <div className="flex items-center gap-2 mt-1 text-muted-foreground text-sm">
+                    <MapPin className="h-3.5 w-3.5" />
+                    <span>{tournament.location || "Online"}</span>
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 mt-auto">
+                <div className="grid grid-cols-2 gap-4 py-4 border-y border-muted/40">
                   <div className="space-y-1">
-                    <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
-                      <Users className="h-3 w-3" /> Capacity
-                    </div>
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Category</p>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-black">{t.teams}/{t.maxTeams}</span>
-                      <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-secondary rounded-full" 
-                          style={{ width: `${(t.teams / t.maxTeams) * 100}%` }} 
-                        />
-                      </div>
+                      <Users className="h-4 w-4 text-secondary" />
+                      <span className="font-bold text-sm">{tournament.ageCategory}</span>
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
-                      <Swords className="h-3 w-3" /> Matches
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Schedule</p>
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-secondary" />
+                      <span className="font-bold text-sm">
+                        {tournament.startDate ? new Date(tournament.startDate).toLocaleDateString() : "TBD"}
+                      </span>
                     </div>
-                    <span className="text-sm font-black">{t.matches} Played</span>
                   </div>
                 </div>
 
-                <div className="mt-5 pt-4 border-t border-muted flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-[11px] font-bold text-muted-foreground">
-                    <Calendar className="h-3 w-3 text-secondary" />
-                    {t.dates}
+                <div className="flex items-center justify-between pt-2">
+                  <div className="flex -space-x-2">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="h-8 w-8 rounded-full border-2 border-card bg-muted flex items-center justify-center overflow-hidden">
+                        <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${tournament.id}${i}`} alt="Team" />
+                      </div>
+                    ))}
+                    <div className="h-8 w-8 rounded-full border-2 border-card bg-muted flex items-center justify-center text-[10px] font-bold">
+                      +{tournament.maxTeams}
+                    </div>
                   </div>
-                  <Button variant="ghost" size="sm" className="h-7 text-xs font-bold text-secondary p-0 hover:bg-transparent hover:underline">
-                    View Details
-                  </Button>
+                  
+                  <div className="flex gap-2">
+                    <Link to={`/tournaments/${tournament.id}`} className="flex-1">
+                      <Button variant="ghost" size="sm" className="w-full font-bold">Details</Button>
+                    </Link>
+                    {tournament.status === 'upcoming' && (
+                      <Link to={`/tournaments/${tournament.id}/register`} className="flex-1">
+                        <Button size="sm" className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground font-bold">Register</Button>
+                      </Link>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

@@ -43,6 +43,7 @@ const OrganizationDetailPage = lazy(() => import("@/pages/organizations/Organiza
 const TournamentsPage = lazy(() => import("@/pages/TournamentsPage"));
 const TournamentDetailPage = lazy(() => import("@/pages/TournamentDetailPage"));
 const TournamentCreatePage = lazy(() => import("@/pages/tournaments/TournamentCreatePage"));
+const TournamentRegistrationPage = lazy(() => import("@/pages/tournaments/TournamentRegistrationPage"));
 const TournamentBracketPage = lazy(() => import("@/pages/tournaments/TournamentBracketPage"));
 const TournamentSchedulePage = lazy(() => import("@/pages/tournaments/TournamentSchedulePage"));
 const SeasonManagementPage = lazy(() => import("@/pages/tournaments/SeasonManagementPage"));
@@ -132,7 +133,8 @@ const App = () => (
 
             {/* Tournaments */}
             <Route path="/tournaments" element={<DL><TournamentsPage /></DL>} />
-            <Route path="/tournaments/detail" element={<DL><TournamentDetailPage /></DL>} />
+            <Route path="/tournaments/:id" element={<DL><TournamentDetailPage /></DL>} />
+            <Route path="/tournaments/:id/register" element={<DL><TournamentRegistrationPage /></DL>} />
             <Route path="/tournaments/create" element={<DL><TournamentCreatePage /></DL>} />
             <Route path="/tournaments/bracket" element={<DL><TournamentBracketPage /></DL>} />
             <Route path="/tournaments/schedule" element={<DL><TournamentSchedulePage /></DL>} />

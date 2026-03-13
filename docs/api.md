@@ -81,6 +81,33 @@ Sumber: [playerService.ts](file:///d:/PROYEK%20WEB%20MASTER/APLIKASI/tourney-hub
 - `updatePlayer(id, data)`
 - `deletePlayer(id)`
 
+### Tournaments
+
+Sumber: [tournamentService.ts](file:///src/modules/tournaments/services/tournamentService.ts)
+
+- `create(input, status)`: Create a new tournament with full details (fee, sport type, rules).
+- `getAll()`: Get all tournaments from database.
+
+### Scheduling
+
+Sumber: [scheduling.ts](file:///src/lib/scheduling.ts)
+
+- `generateRoundRobin(tournamentId, organizationId, teamIds, startDate)`: Automatically generate round robin matches.
+- `generateKnockout(tournamentId, organizationId, teamIds, startDate)`: Automatically generate knockout matches.
+
+### Verification
+
+Sumber: [verificationService.ts](file:///src/modules/verification/services/verificationService.ts)
+
+- `verifyTeam(tournamentId, teamId, status, notes)`: Approve or reject team registration.
+- `verifyPlayer(playerId, status, notes)`: Approve or reject individual player.
+- `checkDoubleRegistration(playerId, tournamentId)`: Check if player is already registered.
+
+### Payments & Notifications
+
+- `payments` table tracks all registration fees and status.
+- `notifications` table handles real-time alerts for verification and status updates.
+
 ## 2) Proposal REST API (Tournament Management System)
 
 Tujuan: memungkinkan “real-time update” yang sesungguhnya, integrasi SEO, dan konsistensi data lintas modul.

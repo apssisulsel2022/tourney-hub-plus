@@ -123,6 +123,39 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
         <div className="xl:col-span-2 space-y-8">
+          {/* Pending Verifications */}
+          <div className="bg-card rounded-xl border p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2">
+                <Shield className="h-5 w-5 text-secondary" />
+                <h2 className="text-xl font-bold">Pending Verifications</h2>
+              </div>
+              <Badge variant="secondary" className="bg-secondary/10 text-secondary border-secondary/20 font-bold">5 Pending</Badge>
+            </div>
+            <div className="space-y-4">
+              {[
+                { id: "1", team: "FC Thunder", tournament: "Premier Cup 2026", date: "2 hours ago" },
+                { id: "2", team: "Red Lions", tournament: "City League Season 8", date: "5 hours ago" },
+              ].map((item) => (
+                <div key={item.id} className="flex items-center justify-between p-4 bg-muted/30 rounded-xl border border-muted/60">
+                  <div className="flex items-center gap-4">
+                    <div className="h-10 w-10 rounded-full bg-secondary/10 flex items-center justify-center">
+                      <Users className="h-5 w-5 text-secondary" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm">{item.team}</p>
+                      <p className="text-xs text-muted-foreground">{item.tournament} · {item.date}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" className="h-8 text-xs font-bold border-destructive/20 text-destructive hover:bg-destructive/10">Reject</Button>
+                    <Button size="sm" className="h-8 text-xs font-bold bg-secondary hover:bg-secondary/90 text-secondary-foreground">Approve</Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* Quick Actions Control Center */}
           <div className="bg-card rounded-xl border p-6 shadow-sm">
             <div className="flex items-center justify-between mb-6">

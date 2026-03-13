@@ -32,6 +32,9 @@ export interface Tournament {
   maxTeams: number;
   venueId?: string;
   registrationDeadline?: string;
+  registrationFee: number;
+  sportType: string;
+  rules?: string;
   logoUrl?: string;
   organizationId: string;
   status: "draft" | "upcoming" | "active" | "completed";

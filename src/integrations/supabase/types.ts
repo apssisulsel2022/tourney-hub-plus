@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json | null
+          entity_id: string | null
+          entity_type: string
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json | null
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json | null
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       match_events: {
         Row: {
           created_at: string
@@ -100,6 +130,93 @@ export type Database = {
             columns: ["referee_id"]
             isOneToOne: false
             referencedRelation: "referees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean | null
+          message: string
+          title: string
+          type: Database["public"]["Enums"]["notification_type"] | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          message: string
+          title: string
+          type?: Database["public"]["Enums"]["notification_type"] | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          title?: string
+          type?: Database["public"]["Enums"]["notification_type"] | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      payments: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          invoice_url: string | null
+          payment_method: string | null
+          receipt_url: string | null
+          status: Database["public"]["Enums"]["payment_status"] | null
+          team_id: string | null
+          tournament_id: string | null
+          transaction_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          invoice_url?: string | null
+          payment_method?: string | null
+          receipt_url?: string | null
+          status?: Database["public"]["Enums"]["payment_status"] | null
+          team_id?: string | null
+          tournament_id?: string | null
+          transaction_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          invoice_url?: string | null
+          payment_method?: string | null
+          receipt_url?: string | null
+          status?: Database["public"]["Enums"]["payment_status"] | null
+          team_id?: string | null
+          tournament_id?: string | null
+          transaction_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
             referencedColumns: ["id"]
           },
         ]
@@ -430,6 +547,9 @@ export type Database = {
           age_category: Database["public"]["Enums"]["age_category"] | null
           created_at: string
           date_of_birth: string | null
+          document_health_cert_url: string | null
+          document_ktp_url: string | null
+          document_statement_url: string | null
           email: string | null
           emergency_contact: Json | null
           id: string
@@ -448,12 +568,19 @@ export type Database = {
           status: Database["public"]["Enums"]["player_status"]
           team_id: string | null
           updated_at: string
+          verification_notes: string | null
+          verification_status:
+            | Database["public"]["Enums"]["registration_status"]
+            | null
         }
         Insert: {
           address?: string | null
           age_category?: Database["public"]["Enums"]["age_category"] | null
           created_at?: string
           date_of_birth?: string | null
+          document_health_cert_url?: string | null
+          document_ktp_url?: string | null
+          document_statement_url?: string | null
           email?: string | null
           emergency_contact?: Json | null
           id?: string
@@ -472,12 +599,19 @@ export type Database = {
           status?: Database["public"]["Enums"]["player_status"]
           team_id?: string | null
           updated_at?: string
+          verification_notes?: string | null
+          verification_status?:
+            | Database["public"]["Enums"]["registration_status"]
+            | null
         }
         Update: {
           address?: string | null
           age_category?: Database["public"]["Enums"]["age_category"] | null
           created_at?: string
           date_of_birth?: string | null
+          document_health_cert_url?: string | null
+          document_ktp_url?: string | null
+          document_statement_url?: string | null
           email?: string | null
           emergency_contact?: Json | null
           id?: string
@@ -496,6 +630,10 @@ export type Database = {
           status?: Database["public"]["Enums"]["player_status"]
           team_id?: string | null
           updated_at?: string
+          verification_notes?: string | null
+          verification_status?:
+            | Database["public"]["Enums"]["registration_status"]
+            | null
         }
         Relationships: [
           {
@@ -769,20 +907,26 @@ export type Database = {
         Row: {
           id: string
           registered_at: string
+          status: Database["public"]["Enums"]["registration_status"] | null
           team_id: string
           tournament_id: string
+          verification_notes: string | null
         }
         Insert: {
           id?: string
           registered_at?: string
+          status?: Database["public"]["Enums"]["registration_status"] | null
           team_id: string
           tournament_id: string
+          verification_notes?: string | null
         }
         Update: {
           id?: string
           registered_at?: string
+          status?: Database["public"]["Enums"]["registration_status"] | null
           team_id?: string
           tournament_id?: string
+          verification_notes?: string | null
         }
         Relationships: [
           {
@@ -815,6 +959,9 @@ export type Database = {
           name: string
           organization_id: string
           registration_deadline: string | null
+          registration_fee: number | null
+          rules: string | null
+          sport_type: string | null
           start_date: string | null
           status: Database["public"]["Enums"]["tournament_status"]
           updated_at: string
@@ -832,6 +979,9 @@ export type Database = {
           name: string
           organization_id: string
           registration_deadline?: string | null
+          registration_fee?: number | null
+          rules?: string | null
+          sport_type?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["tournament_status"]
           updated_at?: string
@@ -849,6 +999,9 @@ export type Database = {
           name?: string
           organization_id?: string
           registration_deadline?: string | null
+          registration_fee?: number | null
+          rules?: string | null
+          sport_type?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["tournament_status"]
           updated_at?: string
@@ -1098,6 +1251,9 @@ export type Database = {
         | "training_ground"
         | "indoor"
         | "community_field"
+      notification_type: "info" | "success" | "warning" | "error"
+      payment_status: "pending" | "completed" | "failed" | "refunded"
+      registration_status: "pending" | "verified" | "rejected" | "paid"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1304,6 +1460,9 @@ export const Constants = {
         "indoor",
         "community_field",
       ],
+      notification_type: ["info", "success", "warning", "error"],
+      payment_status: ["pending", "completed", "failed", "refunded"],
+      registration_status: ["pending", "verified", "rejected", "paid"],
     },
   },
 } as const
