@@ -15,23 +15,28 @@ const tournamentSchema = z.object({
   venueId: z.string().optional(),
   registrationDeadline: z.string().optional(),
   logoUrl: z.string().optional(),
+  organizationId: z.string().min(1, "Organization is required"),
 });
 
-export const useTournamentForm = (onSubmit: (data: CreateTournamentInput) => void) => {
+export const useTournamentForm = (
+  onSubmit: (data: CreateTournamentInput | Partial<CreateTournamentInput>) => void,
+  initialData?: Partial<CreateTournamentInput>
+) => {
   const form = useForm<CreateTournamentInput>({
     resolver: zodResolver(tournamentSchema),
     defaultValues: {
-      name: "",
-      description: "",
-      format: "League",
-      ageCategory: "Senior",
-      startDate: "",
-      endDate: "",
-      location: "",
-      maxTeams: 16,
-      venueId: "",
-      registrationDeadline: "",
-      logoUrl: "",
+      name: initialData?.name || "",
+      description: initialData?.description || "",
+      format: initialData?.format || "League",
+      ageCategory: initialData?.ageCategory || "Senior",
+      startDate: initialData?.startDate || "",
+      endDate: initialData?.endDate || "",
+      location: initialData?.location || "",
+      maxTeams: initialData?.maxTeams || 16,
+      venueId: initialData?.venueId || "",
+      registrationDeadline: initialData?.registrationDeadline || "",
+      logoUrl: initialData?.logoUrl || "",
+      organizationId: initialData?.organizationId || "",
     },
   });
 

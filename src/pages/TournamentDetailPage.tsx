@@ -22,6 +22,7 @@ const mockTournament: Tournament = {
   maxTeams: 8,
   ageCategory: "U-21",
   format: "League",
+  organizationId: "org-1",
 };
 
 export default function TournamentDetailPage() {
