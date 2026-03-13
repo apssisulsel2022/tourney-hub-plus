@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useMemo, useState } from "react";
 import { MapContainer, Marker, Popup, TileLayer, useMapEvents } from "react-leaflet";
 import L from "leaflet";
@@ -21,11 +20,10 @@ type ClusterPointProps = {
   title: string;
 };
 
-type ClusterPoint = {
-  type: "Feature";
-  properties: ClusterPointProps & { point_count?: number; point_count_abbreviated?: number };
-  geometry: { type: "Point"; coordinates: [number, number] };
-};
+type ClusterPoint = GeoJSON.Feature<
+  GeoJSON.Point,
+  ClusterPointProps & { point_count?: number; point_count_abbreviated?: number }
+>;
 
 const markerIcon = (label: string, className: string) =>
   L.divIcon({

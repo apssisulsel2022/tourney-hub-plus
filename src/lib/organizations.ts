@@ -27,21 +27,6 @@ export type OrganizationTournament = {
   status: "active" | "upcoming" | "draft";
 };
 
-export type RecentActivity = {
-  id: string;
-  type: "member_joined" | "tournament_created" | "match_completed" | "team_registered" | "setting_changed";
-  description: string;
-  timestampISO: string;
-};
-
-export type UpcomingMatch = {
-  id: string;
-  home: string;
-  away: string;
-  dateISO: string;
-  tournament: string;
-};
-
 export type Organization = {
   id: string;
   name: string;
@@ -51,9 +36,6 @@ export type Organization = {
   foundedYear: number;
   plan: "Starter" | "Pro" | "Enterprise";
   status: OrganizationStatus;
-  phone: string;
-  logoUrl: string;
-  socialLinks: { twitter?: string; instagram?: string; facebook?: string };
   metrics: {
     activeTournaments: number;
     totalTeams: number;
@@ -71,8 +53,6 @@ export type Organization = {
   };
   members: OrganizationMember[];
   tournaments: OrganizationTournament[];
-  recentActivity: RecentActivity[];
-  upcomingMatches: UpcomingMatch[];
 };
 
 const organizationsStorage: Organization[] = [
@@ -86,9 +66,6 @@ const organizationsStorage: Organization[] = [
     foundedYear: 2019,
     plan: "Enterprise",
     status: "active",
-    phone: "+1 (212) 555-0147",
-    logoUrl: "",
-    socialLinks: { twitter: "@cityfootball", instagram: "@cityfootball_nyc", facebook: "cityfootballassociation" },
     metrics: { activeTournaments: 5, totalTeams: 48, totalPlayers: 960, monthlyRevenueUsd: 199, users: 12 },
     metadata: {
       timezone: "America/New_York",
@@ -113,18 +90,6 @@ const organizationsStorage: Organization[] = [
       { id: "cfa-t4", name: "Summer Invitational", teams: 8, status: "draft" },
       { id: "cfa-t5", name: "Women's Cup 2026", teams: 10, status: "active" },
     ],
-    recentActivity: [
-      { id: "cfa-a1", type: "tournament_created", description: "Women's Cup 2026 tournament created", timestampISO: "2026-03-10T14:00:00.000Z" },
-      { id: "cfa-a2", type: "member_joined", description: "Alicia Park invited as Analyst", timestampISO: "2026-03-08T09:30:00.000Z" },
-      { id: "cfa-a3", type: "match_completed", description: "Premier Cup: Eagles 3 - 1 Hawks", timestampISO: "2026-03-07T20:45:00.000Z" },
-      { id: "cfa-a4", type: "team_registered", description: "Riverside FC registered for City League", timestampISO: "2026-03-06T11:00:00.000Z" },
-      { id: "cfa-a5", type: "setting_changed", description: "Billing plan upgraded to Enterprise", timestampISO: "2026-03-01T08:00:00.000Z" },
-    ],
-    upcomingMatches: [
-      { id: "cfa-um1", home: "Eagles FC", away: "Lions United", dateISO: "2026-03-14T18:00:00.000Z", tournament: "Premier Cup 2026" },
-      { id: "cfa-um2", home: "Metro Stars", away: "Harbor City", dateISO: "2026-03-15T15:30:00.000Z", tournament: "City League Season 8" },
-      { id: "cfa-um3", home: "Queens Park", away: "Bronx United", dateISO: "2026-03-16T14:00:00.000Z", tournament: "Women's Cup 2026" },
-    ],
   },
   {
     id: "org-nyl",
@@ -135,9 +100,6 @@ const organizationsStorage: Organization[] = [
     foundedYear: 2017,
     plan: "Pro",
     status: "active",
-    phone: "+44 20 7946 0958",
-    logoUrl: "",
-    socialLinks: { twitter: "@youthleague_uk", instagram: "@nyl_official" },
     metrics: { activeTournaments: 3, totalTeams: 26, totalPlayers: 520, monthlyRevenueUsd: 99, users: 8 },
     metadata: {
       timezone: "Europe/London",
@@ -157,13 +119,6 @@ const organizationsStorage: Organization[] = [
       { id: "nyl-t2", name: "U14 Development Cup", teams: 12, status: "active" },
       { id: "nyl-t3", name: "Winter Youth Series", teams: 10, status: "upcoming" },
     ],
-    recentActivity: [
-      { id: "nyl-a1", type: "match_completed", description: "U16 League: Chelsea Youth 2 - 2 Arsenal Academy", timestampISO: "2026-03-09T17:00:00.000Z" },
-      { id: "nyl-a2", type: "team_registered", description: "Tottenham U14 registered for Development Cup", timestampISO: "2026-03-07T10:00:00.000Z" },
-    ],
-    upcomingMatches: [
-      { id: "nyl-um1", home: "Liverpool Academy", away: "Man City Youth", dateISO: "2026-03-15T14:00:00.000Z", tournament: "U16 National League" },
-    ],
   },
   {
     id: "org-copa",
@@ -174,9 +129,6 @@ const organizationsStorage: Organization[] = [
     foundedYear: 2020,
     plan: "Pro",
     status: "active",
-    phone: "+55 11 3456-7890",
-    logoUrl: "",
-    socialLinks: { instagram: "@coparegional_br" },
     metrics: { activeTournaments: 2, totalTeams: 18, totalPlayers: 360, monthlyRevenueUsd: 99, users: 5 },
     metadata: {
       timezone: "America/Sao_Paulo",
@@ -194,12 +146,6 @@ const organizationsStorage: Organization[] = [
       { id: "copa-t1", name: "Copa Regional Series A", teams: 10, status: "active" },
       { id: "copa-t2", name: "Copa Regional U21", teams: 8, status: "upcoming" },
     ],
-    recentActivity: [
-      { id: "copa-a1", type: "tournament_created", description: "Copa Regional U21 announced", timestampISO: "2026-03-05T12:00:00.000Z" },
-    ],
-    upcomingMatches: [
-      { id: "copa-um1", home: "São Paulo FC B", away: "Santos Youth", dateISO: "2026-03-17T19:00:00.000Z", tournament: "Copa Regional Series A" },
-    ],
   },
   {
     id: "org-efn",
@@ -210,9 +156,6 @@ const organizationsStorage: Organization[] = [
     foundedYear: 2018,
     plan: "Starter",
     status: "inactive",
-    phone: "+49 30 1234 5678",
-    logoUrl: "",
-    socialLinks: { twitter: "@eurofutsal" },
     metrics: { activeTournaments: 1, totalTeams: 10, totalPlayers: 180, monthlyRevenueUsd: 29, users: 3 },
     metadata: {
       timezone: "Europe/Berlin",
@@ -227,8 +170,6 @@ const organizationsStorage: Organization[] = [
       { id: "efn-m2", name: "Max Weber", role: "Coordinator", email: "max@futsalnet.example.com", status: "invited", lastActiveISO: "2026-02-01T08:00:00.000Z" },
     ],
     tournaments: [{ id: "efn-t1", name: "Euro Futsal Cup", teams: 10, status: "draft" }],
-    recentActivity: [],
-    upcomingMatches: [],
   },
   {
     id: "org-aco",
@@ -239,9 +180,6 @@ const organizationsStorage: Organization[] = [
     foundedYear: 2016,
     plan: "Enterprise",
     status: "active",
-    phone: "+81 3-1234-5678",
-    logoUrl: "",
-    socialLinks: { twitter: "@asiancuporg", instagram: "@asiancup_official", facebook: "asiancuporg" },
     metrics: { activeTournaments: 4, totalTeams: 34, totalPlayers: 720, monthlyRevenueUsd: 199, users: 10 },
     metadata: {
       timezone: "Asia/Tokyo",
@@ -260,14 +198,6 @@ const organizationsStorage: Organization[] = [
       { id: "aco-t2", name: "East Division League", teams: 12, status: "active" },
       { id: "aco-t3", name: "U18 Cup", teams: 20, status: "upcoming" },
       { id: "aco-t4", name: "Futsal Invitational", teams: 8, status: "draft" },
-    ],
-    recentActivity: [
-      { id: "aco-a1", type: "match_completed", description: "Asian Cup: Tokyo FC 1 - 0 Osaka United", timestampISO: "2026-03-10T12:00:00.000Z" },
-      { id: "aco-a2", type: "team_registered", description: "Kyoto Stars registered for U18 Cup", timestampISO: "2026-03-08T08:00:00.000Z" },
-    ],
-    upcomingMatches: [
-      { id: "aco-um1", home: "Yokohama FC", away: "Nagoya Grampus", dateISO: "2026-03-14T13:00:00.000Z", tournament: "Asian Cup 2026" },
-      { id: "aco-um2", home: "Sapporo United", away: "Fukuoka Hawks", dateISO: "2026-03-16T10:00:00.000Z", tournament: "East Division League" },
     ],
   },
 ];

@@ -1,12 +1,10 @@
 import React from "react";
-import { Users, Trophy, Calendar } from "lucide-react";
+import { Users, Trophy, Calendar, MoreVertical } from "lucide-react";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
-import { Link } from "react-router-dom";
 
 export interface TournamentCardProps {
-  id?: string;
   name: string;
   logo?: string;
   category: "U12" | "U14" | "U16" | "U18" | "Adult";
@@ -19,7 +17,6 @@ export interface TournamentCardProps {
 }
 
 export function TournamentCard({
-  id,
   name,
   logo,
   category,
@@ -31,11 +28,11 @@ export function TournamentCard({
   className
 }: TournamentCardProps) {
   const capacityPercentage = (teamsCount / maxTeams) * 100;
-  const detailPath = id ? `/tournaments/${id}` : "/tournaments";
 
   return (
-    <Link to={detailPath} className={cn("block bg-card rounded-xl border p-6 hover:shadow-md transition-all group", className)}>
+    <div className={cn("bg-card rounded-xl border p-6 hover:shadow-md transition-all group", className)}>
       <div className="flex flex-col items-center text-center space-y-4">
+        {/* Circular Logo 150x150 */}
         <div className="relative h-[150px] w-[150px] rounded-full border-4 border-muted overflow-hidden bg-muted flex items-center justify-center shrink-0">
           {logo ? (
             <img src={logo} alt={name} className="h-full w-full object-cover" />
@@ -43,7 +40,7 @@ export function TournamentCard({
             <Trophy className="h-16 w-16 text-muted-foreground/40" />
           )}
           <div className="absolute top-2 right-2">
-            <StatusBadge status={status} />
+             <StatusBadge status={status} />
           </div>
         </div>
 
@@ -61,6 +58,7 @@ export function TournamentCard({
             </span>
           </div>
 
+          {/* Team Capacity Progress Bar */}
           <div className="space-y-2 mb-4">
             <div className="flex justify-between text-xs font-medium">
               <span className="flex items-center gap-1">
@@ -75,12 +73,12 @@ export function TournamentCard({
             <div className="text-[10px] text-muted-foreground uppercase font-semibold">
               Ends {endDate}
             </div>
-            <span className="text-secondary hover:text-secondary/80 text-sm font-bold flex items-center gap-1 transition-colors">
+            <button className="text-secondary hover:text-secondary/80 text-sm font-bold flex items-center gap-1 transition-colors">
               Manage
-            </span>
+            </button>
           </div>
         </div>
       </div>
-    </Link>
+    </div>
   );
 }

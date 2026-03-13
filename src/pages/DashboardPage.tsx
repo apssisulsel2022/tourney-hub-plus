@@ -7,7 +7,6 @@ import { DashboardTimeline } from "@/components/dashboard/DashboardTimeline";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useRealtime } from "@/modules/realtime/hooks/useRealtime";
-import { Link } from "react-router-dom";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -96,16 +95,14 @@ export default function DashboardPage() {
           value={dashboardStats.activeTournaments || 0} 
           change="+1 vs last month" 
           changeType="positive" 
-          icon={Trophy}
-          href="/tournaments"
+          icon={Trophy} 
         />
         <StatCard 
           title="Registered Teams" 
           value={dashboardStats.registeredTeams || 0} 
           change="Breakdown by tourney" 
           changeType="neutral" 
-          icon={Users}
-          href="/teams"
+          icon={Users} 
         />
         <StatCard 
           title="Matches Today" 
@@ -113,16 +110,14 @@ export default function DashboardPage() {
           change={`${dashboardStats.liveMatches || 0} live at National Stadium`} 
           changeType="positive" 
           icon={Swords} 
-          iconColor="bg-destructive/10"
-          href="/matches"
+          iconColor="bg-destructive/10" 
         />
         <StatCard 
           title="Upcoming (7 Days)" 
           value={14} 
           change="Next: United vs Dynamo" 
           changeType="neutral" 
-          icon={Calendar}
-          href="/calendar"
+          icon={Calendar} 
         />
       </div>
 
@@ -141,7 +136,7 @@ export default function DashboardPage() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold">My Active Tournaments</h2>
-              <Button variant="link" className="text-secondary font-bold" asChild><Link to="/tournaments">View All</Link></Button>
+              <Button variant="link" className="text-secondary font-bold">View All</Button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4">
               {activeTournaments.map((tournament) => (
