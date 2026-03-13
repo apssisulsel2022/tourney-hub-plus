@@ -5,11 +5,10 @@ import { useTournamentForm } from "../hooks/useTournamentForm";
 import { CreateTournamentInput } from "../types/tournament";
 import { supabase } from "@/integrations/supabase/client";
 
-export interface TournamentFormProps {
-  onSubmit: (data: CreateTournamentInput | Partial<CreateTournamentInput>) => void;
+interface TournamentFormProps {
+  onSubmit: (data: CreateTournamentInput) => void;
   onCancel?: () => void;
   onSaveDraft?: () => void;
-  initialData?: Partial<CreateTournamentInput>;
 }
 
 export function TournamentForm({ onSubmit, onCancel, onSaveDraft, initialData }: TournamentFormProps) {

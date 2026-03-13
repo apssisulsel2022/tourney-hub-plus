@@ -3,7 +3,6 @@ import { Calendar, Filter, ChevronLeft, ChevronRight, Clock, MapPin, Trophy } fr
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Link } from "react-router-dom";
 
 interface Match {
   id: string;
@@ -90,9 +89,8 @@ export function DashboardTimeline() {
       <div className="space-y-3">
         {filteredMatches.length > 0 ? (
           filteredMatches.map((match) => (
-            <Link 
-              key={match.id}
-              to={`/matches/${match.id}`}
+            <div 
+              key={match.id} 
               className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border bg-background hover:border-secondary transition-all cursor-pointer group gap-4"
             >
               <div className="flex items-center gap-4">
@@ -125,7 +123,7 @@ export function DashboardTimeline() {
                 </div>
                 <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-secondary transition-colors" />
               </div>
-            </Link>
+            </div>
           ))
         ) : (
           <div className="py-12 text-center border-2 border-dashed rounded-xl flex flex-col items-center justify-center text-muted-foreground">

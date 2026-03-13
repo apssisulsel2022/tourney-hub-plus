@@ -5,28 +5,16 @@ import {
   ArrowLeft,
   Building2,
   Calendar,
-  CalendarPlus,
   ChevronRight,
-  Clock,
-  CreditCard,
   ExternalLink,
-  Facebook,
-  Globe,
-  Instagram,
   Mail,
   MapPin,
   MoreVertical,
-  Phone,
   Search,
   Settings,
   Shield,
-  Swords,
   Trophy,
-  Twitter,
-  UserPlus,
   Users,
-  FileText,
-  Activity,
 } from "lucide-react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -36,7 +24,6 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -59,31 +46,12 @@ const initials = (name: string) =>
     .toUpperCase();
 
 const fmtDate = (iso: string) => new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-const fmtDateTime = (iso: string) => new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 
 const memberStatusBadge = (status: MemberStatus) => {
   if (status === "active") return <Badge className="rounded-2xl font-black text-[10px] uppercase tracking-widest bg-success/15 text-success border border-success/20">Active</Badge>;
   if (status === "invited") return <Badge variant="outline" className="rounded-2xl font-black text-[10px] uppercase tracking-widest">Invited</Badge>;
   return <Badge className="rounded-2xl font-black text-[10px] uppercase tracking-widest bg-destructive/10 text-destructive border border-destructive/20">Suspended</Badge>;
 };
-
-const activityIcon = (type: string) => {
-  switch (type) {
-    case "tournament_created": return <Trophy className="h-4 w-4 text-secondary" />;
-    case "member_joined": return <UserPlus className="h-4 w-4 text-info" />;
-    case "match_completed": return <Swords className="h-4 w-4 text-accent" />;
-    case "team_registered": return <Users className="h-4 w-4 text-primary" />;
-    case "setting_changed": return <Settings className="h-4 w-4 text-muted-foreground" />;
-    default: return <Activity className="h-4 w-4 text-muted-foreground" />;
-  }
-};
-
-const quickActions = [
-  { label: "Create Tournament", icon: Trophy, color: "bg-secondary/10 text-secondary" },
-  { label: "Register Team", icon: Users, color: "bg-info/10 text-info" },
-  { label: "Generate Schedule", icon: CalendarPlus, color: "bg-accent/10 text-accent" },
-  { label: "Add Venue", icon: MapPin, color: "bg-destructive/10 text-destructive" },
-];
 
 export default function OrganizationDetailPage() {
   const { id } = useParams();
@@ -130,7 +98,7 @@ export default function OrganizationDetailPage() {
           <div className="text-xl font-black">Organization ID is missing</div>
           <div className="text-sm text-muted-foreground mt-2">Please open the detail page from the Organizations list.</div>
           <div className="mt-6">
-            <Link to="/organizations" className="inline-flex h-12 min-h-[48px] items-center justify-center rounded-2xl px-5 font-black bg-secondary text-secondary-foreground">
+            <Link to="/organizations" className="inline-flex h-12 min-h-[48px] items-center justify-center rounded-2xl px-5 font-black bg-secondary text-white">
               Back to organizations
             </Link>
           </div>
@@ -150,9 +118,9 @@ export default function OrganizationDetailPage() {
           </div>
         </div>
         <Skeleton className="h-[220px] w-full rounded-3xl" />
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-[80px] rounded-2xl" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-[120px] rounded-3xl" />
           ))}
         </div>
         <Skeleton className="h-[520px] w-full rounded-3xl" />
@@ -167,7 +135,7 @@ export default function OrganizationDetailPage() {
           <div className="text-xl font-black text-destructive">Failed to load organization</div>
           <div className="text-sm text-muted-foreground mt-2">Please try again.</div>
           <div className="mt-6 flex items-center justify-center gap-2">
-            <Button className="h-11 rounded-2xl font-black" variant="secondary" onClick={() => orgQuery.refetch()}>
+            <Button className="h-11 rounded-2xl font-black bg-secondary hover:bg-secondary/90 text-white" onClick={() => orgQuery.refetch()}>
               Retry
             </Button>
             <Button variant="outline" className="h-11 rounded-2xl font-bold" asChild>
@@ -186,7 +154,7 @@ export default function OrganizationDetailPage() {
           <div className="text-xl font-black">Organization not found</div>
           <div className="text-sm text-muted-foreground mt-2">The organization ID is invalid or the record no longer exists.</div>
           <div className="mt-6">
-            <Link to="/organizations" className="inline-flex h-12 min-h-[48px] items-center justify-center rounded-2xl px-5 font-black bg-secondary text-secondary-foreground">
+            <Link to="/organizations" className="inline-flex h-12 min-h-[48px] items-center justify-center rounded-2xl px-5 font-black bg-secondary text-white">
               Back to organizations
             </Link>
           </div>
@@ -197,7 +165,6 @@ export default function OrganizationDetailPage() {
 
   return (
     <div className="space-y-8 max-w-[1600px] mx-auto pb-10">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link to="/organizations">
@@ -221,7 +188,7 @@ export default function OrganizationDetailPage() {
               <ExternalLink className="h-4 w-4 text-secondary" aria-hidden="true" /> Website
             </a>
           </Button>
-          <Button className="h-11 rounded-2xl font-black gap-2" variant="secondary">
+          <Button className="h-11 rounded-2xl font-black gap-2 bg-secondary hover:bg-secondary/90 text-white shadow-lg shadow-secondary/20">
             <Settings className="h-4 w-4" aria-hidden="true" /> Manage
           </Button>
           <DropdownMenu>
@@ -242,7 +209,6 @@ export default function OrganizationDetailPage() {
         </div>
       </div>
 
-      {/* Hero Banner */}
       <motion.section
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -273,30 +239,17 @@ export default function OrganizationDetailPage() {
                   <span className="flex items-center gap-2"><MapPin className="h-4 w-4" aria-hidden="true" /> {org.location.city}, {org.location.country}</span>
                   <span className="flex items-center gap-2"><Calendar className="h-4 w-4" aria-hidden="true" /> Since {org.foundedYear}</span>
                   <span className="flex items-center gap-2"><Users className="h-4 w-4" aria-hidden="true" /> {org.metrics.users} members</span>
-                  <span className="flex items-center gap-2"><Phone className="h-4 w-4" aria-hidden="true" /> {org.phone}</span>
                   <span className="flex items-center gap-2"><Mail className="h-4 w-4" aria-hidden="true" /> {org.metadata.contactEmail}</span>
-                </div>
-                {/* Social Links */}
-                <div className="flex items-center gap-3 pt-1">
-                  {org.socialLinks.twitter && (
-                    <span className="flex items-center gap-1.5 text-xs text-white/60"><Twitter className="h-3.5 w-3.5" /> {org.socialLinks.twitter}</span>
-                  )}
-                  {org.socialLinks.instagram && (
-                    <span className="flex items-center gap-1.5 text-xs text-white/60"><Instagram className="h-3.5 w-3.5" /> {org.socialLinks.instagram}</span>
-                  )}
-                  {org.socialLinks.facebook && (
-                    <span className="flex items-center gap-1.5 text-xs text-white/60"><Facebook className="h-3.5 w-3.5" /> {org.socialLinks.facebook}</span>
-                  )}
                 </div>
               </div>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full lg:w-[520px]">
               {[
-                { label: "Active Tournaments", value: org.metrics.activeTournaments, icon: Trophy },
-                { label: "Registered Teams", value: org.metrics.totalTeams, icon: Shield },
-                { label: "Matches Today", value: org.upcomingMatches?.filter(m => new Date(m.dateISO).toDateString() === new Date().toDateString()).length ?? 0, icon: Swords },
-                { label: "Upcoming Matches", value: org.upcomingMatches?.length ?? 0, icon: Calendar },
+                { label: "Tournaments", value: org.metrics.activeTournaments, icon: Trophy },
+                { label: "Teams", value: org.metrics.totalTeams, icon: Shield },
+                { label: "Players", value: org.metrics.totalPlayers, icon: Users },
+                { label: "MRR", value: `$${org.metrics.monthlyRevenueUsd}/mo`, icon: Settings },
               ].map((s) => (
                 <div key={s.label} className="rounded-2xl border border-white/15 bg-white/10 p-4">
                   <div className="flex items-center justify-between">
@@ -311,25 +264,13 @@ export default function OrganizationDetailPage() {
         </div>
       </motion.section>
 
-      {/* Quick Actions */}
-      <section>
-        <h2 className="text-sm font-black uppercase tracking-widest text-muted-foreground mb-3">Quick Actions</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {quickActions.map((action) => (
-            <button
-              key={action.label}
-              className="flex flex-col items-center gap-2.5 p-4 rounded-2xl border bg-card hover:bg-muted/50 transition-all hover:shadow-md cursor-pointer group"
-            >
-              <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${action.color} transition-transform group-hover:scale-110`}>
-                <action.icon className="h-5 w-5" />
-              </div>
-              <span className="text-xs font-bold text-center">{action.label}</span>
-            </button>
-          ))}
-        </div>
-      </section>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard title="Active Tournaments" value={org.metrics.activeTournaments} icon={Trophy} />
+        <StatCard title="Total Teams" value={org.metrics.totalTeams} icon={Users} />
+        <StatCard title="Total Players" value={org.metrics.totalPlayers} icon={Users} />
+        <StatCard title="Subscription" value={`${org.plan}`} icon={Settings} />
+      </div>
 
-      {/* Tabs */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="w-full">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <TabsList className="rounded-2xl h-12 w-full md:w-auto overflow-x-auto justify-start [-webkit-overflow-scrolling:touch]">
@@ -343,223 +284,49 @@ export default function OrganizationDetailPage() {
           {activeTab === "overview" ? (
             <TabsContent key="overview" value="overview" className="mt-6">
               <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.18 }}>
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  {/* Column 1: Profile + Subscription */}
-                  <div className="space-y-6">
-                    {/* Organization Profile Card */}
-                    <Card className="rounded-3xl">
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-lg font-black tracking-tight flex items-center gap-2">
-                          <Building2 className="h-5 w-5 text-secondary" /> Profile
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="flex items-center gap-3">
-                          <div className="h-14 w-14 rounded-2xl bg-muted flex items-center justify-center text-lg font-black">
-                            {org.shortName}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="bg-card rounded-3xl border overflow-hidden">
+                    <div className="px-6 py-4 border-b bg-muted/30">
+                      <h2 className="text-lg font-black tracking-tight">Active Tournaments</h2>
+                      <p className="text-sm text-muted-foreground">Current competitions managed by this organization.</p>
+                    </div>
+                    <div className="divide-y">
+                      {org.tournaments.map((t) => (
+                        <div key={t.id} className="flex items-center justify-between px-6 py-4 hover:bg-muted/20 transition-colors">
+                          <div className="min-w-0">
+                            <div className="text-sm font-black truncate">{t.name}</div>
+                            <div className="text-xs text-muted-foreground font-bold">{t.teams} teams</div>
                           </div>
-                          <div>
-                            <div className="font-black">{org.name}</div>
-                            <div className="text-xs text-muted-foreground">{org.location.city}, {org.location.country}</div>
-                          </div>
+                          <StatusBadge status={t.status} />
                         </div>
-                        <p className="text-sm text-muted-foreground leading-relaxed">{org.description}</p>
-                        <div className="space-y-2.5">
-                          <div className="flex items-center gap-2 text-sm">
-                            <Mail className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-muted-foreground">{org.metadata.contactEmail}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm">
-                            <Phone className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-muted-foreground">{org.phone}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm">
-                            <Globe className="h-4 w-4 text-muted-foreground" />
-                            <a href={org.metadata.website} target="_blank" rel="noreferrer" className="text-secondary hover:underline truncate">
-                              {org.metadata.website}
-                            </a>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm">
-                            <Calendar className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-muted-foreground">Founded {org.foundedYear}</span>
-                          </div>
-                        </div>
-                        {/* Social */}
-                        <div className="flex gap-2 pt-1">
-                          {org.socialLinks.twitter && (
-                            <div className="flex items-center gap-1.5 rounded-xl bg-muted px-3 py-1.5 text-xs font-bold">
-                              <Twitter className="h-3.5 w-3.5" /> {org.socialLinks.twitter}
-                            </div>
-                          )}
-                          {org.socialLinks.instagram && (
-                            <div className="flex items-center gap-1.5 rounded-xl bg-muted px-3 py-1.5 text-xs font-bold">
-                              <Instagram className="h-3.5 w-3.5" /> {org.socialLinks.instagram}
-                            </div>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    {/* Subscription & Billing Card */}
-                    <Card className="rounded-3xl">
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-lg font-black tracking-tight flex items-center gap-2">
-                          <CreditCard className="h-5 w-5 text-secondary" /> Subscription
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="text-2xl font-black">{org.plan}</div>
-                            <div className="text-xs text-muted-foreground">Current plan</div>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-2xl font-black tabular-nums">${org.metrics.monthlyRevenueUsd}</div>
-                            <div className="text-xs text-muted-foreground">/month</div>
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">Last billing</span>
-                            <span className="font-bold">{fmtDate(org.metadata.lastBillingISO)}</span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">Region</span>
-                            <span className="font-bold">{org.metadata.region}</span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">Timezone</span>
-                            <span className="font-bold">{org.metadata.timezone}</span>
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-3 gap-2 pt-1">
-                          {[
-                            { label: "Tournaments", value: org.metrics.activeTournaments },
-                            { label: "Teams", value: org.metrics.totalTeams },
-                            { label: "Players", value: org.metrics.totalPlayers },
-                          ].map((m) => (
-                            <div key={m.label} className="rounded-xl bg-muted p-3 text-center">
-                              <div className="text-lg font-black tabular-nums">{m.value}</div>
-                              <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{m.label}</div>
-                            </div>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
+                      ))}
+                    </div>
                   </div>
 
-                  {/* Column 2: Tournaments + Upcoming Matches */}
-                  <div className="space-y-6">
-                    {/* Active Tournaments */}
-                    <Card className="rounded-3xl">
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-lg font-black tracking-tight flex items-center gap-2">
-                          <Trophy className="h-5 w-5 text-secondary" /> Tournaments
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="p-0">
-                        <div className="divide-y">
-                          {org.tournaments.map((t) => (
-                            <div key={t.id} className="flex items-center justify-between px-6 py-3.5 hover:bg-muted/20 transition-colors">
-                              <div className="min-w-0">
-                                <div className="text-sm font-black truncate">{t.name}</div>
-                                <div className="text-xs text-muted-foreground font-bold">{t.teams} teams</div>
-                              </div>
-                              <StatusBadge status={t.status} />
-                            </div>
-                          ))}
+                  <div className="bg-card rounded-3xl border overflow-hidden">
+                    <div className="px-6 py-4 border-b bg-muted/30">
+                      <h2 className="text-lg font-black tracking-tight">Highlights</h2>
+                      <p className="text-sm text-muted-foreground">Key organization metadata at a glance.</p>
+                    </div>
+                    <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {[
+                        { label: "Region", value: org.metadata.region },
+                        { label: "Timezone", value: org.metadata.timezone },
+                        { label: "Created", value: fmtDate(org.metadata.createdISO) },
+                        { label: "Last Billing", value: fmtDate(org.metadata.lastBillingISO) },
+                      ].map((item) => (
+                        <div key={item.label} className="rounded-2xl border bg-muted/20 p-4">
+                          <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{item.label}</div>
+                          <div className="text-sm font-black mt-1">{item.value}</div>
                         </div>
-                      </CardContent>
-                    </Card>
-
-                    {/* Upcoming Matches */}
-                    <Card className="rounded-3xl">
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-lg font-black tracking-tight flex items-center gap-2">
-                          <Swords className="h-5 w-5 text-secondary" /> Upcoming Matches
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="p-0">
-                        {org.upcomingMatches.length === 0 ? (
-                          <div className="px-6 py-8 text-center text-sm text-muted-foreground">No upcoming matches scheduled.</div>
-                        ) : (
-                          <div className="divide-y">
-                            {org.upcomingMatches.map((match) => (
-                              <div key={match.id} className="px-6 py-3.5 hover:bg-muted/20 transition-colors">
-                                <div className="flex items-center justify-between">
-                                  <div className="text-sm font-black">
-                                    {match.home} <span className="text-muted-foreground font-medium">vs</span> {match.away}
-                                  </div>
-                                </div>
-                                <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                                  <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {fmtDateTime(match.dateISO)}</span>
-                                  <span className="flex items-center gap-1"><Trophy className="h-3 w-3" /> {match.tournament}</span>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </div>
-
-                  {/* Column 3: Activity Feed + Highlights */}
-                  <div className="space-y-6">
-                    {/* Recent Activity */}
-                    <Card className="rounded-3xl">
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-lg font-black tracking-tight flex items-center gap-2">
-                          <Activity className="h-5 w-5 text-secondary" /> Recent Activity
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="p-0">
-                        {org.recentActivity.length === 0 ? (
-                          <div className="px-6 py-8 text-center text-sm text-muted-foreground">No recent activity.</div>
-                        ) : (
-                          <div className="divide-y">
-                            {org.recentActivity.map((a) => (
-                              <div key={a.id} className="flex items-start gap-3 px-6 py-3.5 hover:bg-muted/20 transition-colors">
-                                <div className="mt-0.5 shrink-0">{activityIcon(a.type)}</div>
-                                <div className="min-w-0">
-                                  <div className="text-sm font-bold">{a.description}</div>
-                                  <div className="text-xs text-muted-foreground mt-0.5">{fmtDateTime(a.timestampISO)}</div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-
-                    {/* Highlights */}
-                    <Card className="rounded-3xl">
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-lg font-black tracking-tight flex items-center gap-2">
-                          <Globe className="h-5 w-5 text-secondary" /> Highlights
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="grid grid-cols-2 gap-3">
-                          {[
-                            { label: "Region", value: org.metadata.region },
-                            { label: "Timezone", value: org.metadata.timezone },
-                            { label: "Created", value: fmtDate(org.metadata.createdISO) },
-                            { label: "Members", value: `${org.metrics.users} active` },
-                          ].map((item) => (
-                            <div key={item.label} className="rounded-xl border bg-muted/20 p-3">
-                              <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{item.label}</div>
-                              <div className="text-sm font-black mt-1">{item.value}</div>
-                            </div>
-                          ))}
-                        </div>
-                        <div className="mt-3 rounded-xl border bg-muted/20 p-3">
-                          <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Website</div>
-                          <a className="text-sm font-black mt-1 inline-flex items-center gap-2 text-secondary hover:underline break-all" href={org.metadata.website} target="_blank" rel="noreferrer">
-                            {org.metadata.website} <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-                          </a>
-                        </div>
-                      </CardContent>
-                    </Card>
+                      ))}
+                      <div className="rounded-2xl border bg-muted/20 p-4 sm:col-span-2">
+                        <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Website</div>
+                        <a className="text-sm font-black mt-1 inline-flex items-center gap-2 text-secondary hover:underline break-all" href={org.metadata.website} target="_blank" rel="noreferrer">
+                          {org.metadata.website} <ExternalLink className="h-4 w-4" aria-hidden="true" />
+                        </a>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -577,14 +344,16 @@ export default function OrganizationDetailPage() {
                         <p className="text-sm text-muted-foreground">Search, filter, and review organization access.</p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button className="h-11 rounded-2xl font-black" variant="secondary">Invite</Button>
+                        <Button className="h-11 rounded-2xl font-black bg-secondary hover:bg-secondary/90 text-white">Invite</Button>
                       </div>
                     </div>
 
                     <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
                       <div className="relative md:col-span-2">
                         <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
-                        <label htmlFor="org-member-search" className="sr-only">Search members</label>
+                        <label htmlFor="org-member-search" className="sr-only">
+                          Search members
+                        </label>
                         <Input
                           id="org-member-search"
                           value={memberSearch}
@@ -707,7 +476,6 @@ export default function OrganizationDetailPage() {
                         { k: "Last billing", v: fmtDate(org.metadata.lastBillingISO) },
                         { k: "Website", v: org.metadata.website },
                         { k: "Contact email", v: org.metadata.contactEmail },
-                        { k: "Phone", v: org.phone },
                       ].map((item) => (
                         <div key={item.k} className="rounded-2xl border bg-muted/20 p-4">
                           <dt className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{item.k}</dt>
